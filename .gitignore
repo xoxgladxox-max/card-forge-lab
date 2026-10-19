@@ -1,0 +1,40 @@
+node_modules/
+.card-forge/
+dist/
+backups/
+*.log
+projects/
+external/
+/private-delivery/
+
+# Local environment, credentials and unrelated logs
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+/NVIDIA Corporation/
+
+# Machine-specific rules and private working records
+/AGENTS.md
+/archive/
+/skills-versions/
+/docs/agent-system/
+/docs/continuity.md
+/docs/plan/
+/docs/research/
+/docs/feedback/
+/docs/handoff/
+/docs/rule-ledger.md
+/docs/spec/visual-workbench-design.md
+/tools/
+/scripts/migrate-legacy.mjs
+*.bak
+*.bak-*
+
+# Build caches
+*.tsbuildinfo
+*.db
+*.db-wal
+*.db-shm

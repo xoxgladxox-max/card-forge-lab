@@ -1,0 +1,136 @@
+{
+    "entries":  {
+                    "2":  {
+                              "uid":  2,
+                              "key":  [
+                                          "温泉"
+                                      ],
+                              "keysecondary":  [
+                                                   "旅行",
+                                                   "修学旅行"
+                                               ],
+                              "comment":  "场景：温泉旅馆（需旅行语境）",
+                              "content":  "\u003cOnsen\u003e\n山中的老旅馆，只有一班巴士能到。\n\u003c/Onsen\u003e",
+                              "constant":  false,
+                              "selective":  true,
+                              "order":  100,
+                              "disable":  false,
+                              "position":  4,
+                              "excludeRecursion":  false,
+                              "preventRecursion":  false,
+                              "delayUntilRecursion":  false,
+                              "probability":  100,
+                              "useProbability":  true,
+                              "depth":  2,
+                              "selectiveLogic":  0,
+                              "outletName":  "",
+                              "group":  "",
+                              "groupOverride":  false,
+                              "groupWeight":  100,
+                              "scanDepth":  null,
+                              "caseSensitive":  null,
+                              "matchWholeWords":  null,
+                              "useGroupScoring":  false,
+                              "automationId":  "",
+                              "role":  0,
+                              "vectorized":  false,
+                              "sticky":  0,
+                              "cooldown":  0,
+                              "delay":  0,
+                              "triggers":  [
+
+                                           ],
+                              "ignoreBudget":  false,
+                              "addMemo":  true,
+                              "displayIndex":  2
+                          },
+                    "1":  {
+                              "uid":  1,
+                              "key":  [
+                                          "/绫音|아야네|Ayane/i",
+                                          "绫音",
+                                          "音酱"
+                                      ],
+                              "keysecondary":  [
+
+                                               ],
+                              "comment":  "角色：绫音",
+                              "content":  "\u003cAyane\u003e\ncharacter:\n  name: 绫音\n  age: 17\n\u003c/Ayane\u003e",
+                              "constant":  false,
+                              "selective":  true,
+                              "order":  100,
+                              "disable":  false,
+                              "position":  0,
+                              "excludeRecursion":  true,
+                              "preventRecursion":  true,
+                              "delayUntilRecursion":  false,
+                              "probability":  100,
+                              "useProbability":  true,
+                              "depth":  4,
+                              "selectiveLogic":  0,
+                              "outletName":  "",
+                              "group":  "",
+                              "groupOverride":  false,
+                              "groupWeight":  100,
+                              "scanDepth":  null,
+                              "caseSensitive":  null,
+                              "matchWholeWords":  null,
+                              "useGroupScoring":  false,
+                              "automationId":  "",
+                              "role":  0,
+                              "vectorized":  false,
+                              "sticky":  0,
+                              "cooldown":  0,
+                              "delay":  0,
+                              "triggers":  [
+
+                                           ],
+                              "ignoreBudget":  false,
+                              "addMemo":  true,
+                              "displayIndex":  1
+                          },
+                    "0":  {
+                              "uid":  0,
+                              "key":  [
+
+                                      ],
+                              "keysecondary":  [
+
+                                               ],
+                              "comment":  "世界基底（常驻）",
+                              "content":  "\u003cWorld\u003e\n舞台是雨季永不结束的临海市。\n\u003c/World\u003e",
+                              "constant":  true,
+                              "selective":  true,
+                              "order":  100,
+                              "disable":  false,
+                              "position":  0,
+                              "excludeRecursion":  true,
+                              "preventRecursion":  true,
+                              "delayUntilRecursion":  false,
+                              "probability":  100,
+                              "useProbability":  true,
+                              "depth":  4,
+                              "selectiveLogic":  0,
+                              "outletName":  "",
+                              "group":  "",
+                              "groupOverride":  false,
+                              "groupWeight":  100,
+                              "scanDepth":  null,
+                              "caseSensitive":  null,
+                              "matchWholeWords":  null,
+                              "useGroupScoring":  false,
+                              "automationId":  "",
+                              "role":  0,
+                              "vectorized":  false,
+                              "sticky":  0,
+                              "cooldown":  0,
+                              "delay":  0,
+                              "triggers":  [
+
+                                           ],
+                              "ignoreBudget":  false,
+                              "addMemo":  true,
+                              "displayIndex":  0
+                          }
+                }
+}
