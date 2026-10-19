@@ -2,7 +2,7 @@
 name: cf-card-worldbook
 description: 世界观与世界书：写世界观设定（原作基底、IF 分歧、世界规则，世界与角色的分界）和 SillyTavern 世界书条目（关键词触发、插入位置、递归、常驻、分组、预算、内嵌或独立世界书）。用户说「写世界观」「做世界书」「加条目」「把设定拆成条目」「条目不触发」「关键词怎么写」时使用。
 metadata:
-  version: 3.1.2
+  version: 4.0.0
   updated: 2026-10-19
 ---
 
@@ -26,7 +26,8 @@ world 是整棵树的地基，而且必须在任何 character 节点之前确认
 
 - `base_world`：用框架的子模块写原作世界本来的样子——`world_history`、`world_location`、`core_systems`、`special_groups`、`social_structure`，环境偏离常识时加 `environment_features`。它的对象是整个原作世界，不是分支剧情用到的那一小块。
 - `if_divergence`：同一套子模块，只写分叉后和原作不同的部分——分歧点与大势、社会变迁、新势力、新据点。
-- `core_rules`：本分支独有、全线生效的世界级规则，用作者实例的 `law_name` / `definition`。
+- `core_rules`：本分支独有、全线生效的世界级规则，法则名作 key，下面分方面写触发、效果、限度、能否逆转。
+- 条目一律用自定义 key：条目名作 key，下一层用这个条目自己的方面名，值写机制（条件、结果、数值、限度、例外）。不套 `name` / `definition` / `description` 通用槽位。骨架和示例见模版文件。
 - 框架里不归 world 的字段：`narrative_rules`、`style_tags` 归 style；`core_gameplay`、`core_drive`、`core_experience`、`protagonist_focus`、`key_characters` 归规划与 character / output。
 
 **挂树**：合一形态是一个 world 节点放完整的 `worldview_profile`。拆分形态是基底世界节点放 `world_foundation` + `base_world`，分支世界节点（与基底平铺，正文写明从基底分出）放 `if_divergence` + `core_rules`，只在特定场景触发的法则可以再拆成 rule 节点。衍生题材优先拆分，让基底有自己的节点。其余按拆分三问。

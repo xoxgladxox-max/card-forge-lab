@@ -1,6 +1,6 @@
 # world 节点模版：worldview_profile
 
-world 节点正文可以参考本模版。本模版是示例：动笔前先按这张卡提出结构提案（用哪几层、保留哪些子模块、去掉哪些、要不要新增），作者确认后再写。正文不写成散文段落。顶层包裹 `<world name="世界名">` … `</world>`；地点、设定、规则、道具分别用 `<location name="…">`、`<lore name="…">`、`<rule name="…">`、`<item name="…">`，形状相同。内部是纯 YAML：key 用英文，value 用中文。
+world 节点正文可以参考本模版。本模版是示例：动笔前先按这张卡提出结构提案（用哪几层、保留哪些子模块、去掉哪些、要不要新增），作者确认后再写。正文不写成散文段落。顶层包裹 `<world name="世界名">` … `</world>`；地点、设定、规则、道具分别用 `<location name="…">`、`<lore name="…">`、`<rule name="…">`、`<item name="…">`，形状相同。内部是纯 YAML：结构 key（`worldview_profile`、`base_world`、`core_systems` 这一类）用英文；条目 key 直接用事物本名，条目下一层的 key 用这个条目自己的方面名，二者都可以用中文；value 用中文。
 
 本模版以一套通用的世界观框架为底（核心字段 + 可选子模块，实例名 `worldview_profile`）。本文件只做两件事：按题材来源给它套上三层外壳，并说明哪些字段归 world、哪些不归。
 
@@ -22,7 +22,7 @@ world 节点正文可以参考本模版。本模版是示例：动笔前先按�
 |---|---|
 | `era`、`culture`，实例里的 `prototype`、`setting_type`、`tone` | world：`world_foundation` |
 | `world_history`、`world_location`、`social_structure`、`special_groups`、`core_systems`、`environment_features` | world：放进 `base_world` 或 `if_divergence` |
-| `core_rule`、`special_rule`，实例里的 `core_rules`（`law_name` / `definition`） | world：`core_rules` |
+| `core_rule`、`special_rule`，实例里的 `core_rules`（法则名作 key） | world：`core_rules` |
 | `narrative_rules`、`style_tags` | style 节点 |
 | `core_gameplay`、`core_drive`、`core_experience` | 对话 key 清单；落到玩法的进 output 节点 |
 | `protagonist_focus`、`key_characters` | 对话 key 清单与 character 节点；world 里人物只以主导者一句带过 |
@@ -39,55 +39,66 @@ worldview_profile:
     tone: |             # 这个世界平常日子的质感
 
   # ── 第一层：基底，原作世界本来的样子 ──
+  # <尖括号> 处换成条目本名和它自己的方面名，不照抄尖括号
   base_world:
-    world_history:      # 解释当下格局与禁忌由来的历史
-      - name:
-        definition:
-        description:
+    world_history:      # 解释当下格局与禁忌由来的历史；只收仍影响当下的
+      <事件名>:
+        <方面>: <这件事留下的现状或规矩>
     world_location:     # 大陆、国家、区域与地缘关系
-      - name:
-        description:
+      <地名>:
+        <方面>: <机制或现状>
     core_systems:       # 魔法、科技、超自然等世界系统
-      - name:
-        definition:
-        description:
-        examples: []
+      <系统名>:
+        <方面>: <条件 → 结果，限度与例外>
     special_groups:     # 种族、生态、组织；物种的一般生理写在这里
-      - name:
-        definition:
-        description:
+      <群体或物种名>:
+        <方面>: <机制或现状>
     social_structure:   # 常态社会：谁统治、谁受排斥、日常怎么过
-      - name:
-        description:
+      <制度或阶层名>:
+        <方面>: <机制或现状>
     environment_features:   # 自然环境偏离常识时才启用
-      - name:
-        description:
+      <现象名>: <一句现状，或展开成方面>
 
   # ── 第二层：差分，从原作哪里分叉、分叉后世界变成什么样 ──
   if_divergence:
     world_history:      # 分歧点与之后的大势，按先后
-      - name:
-        description:
+      <事件名>:
+        <方面>: <分叉后的现状>
     social_structure:   # 分歧后的社会变迁
-      - name:
-        description:
+      <制度或阶层名>:
+        <方面>: <和原作不同的地方>
     special_groups:     # 新崛起或改变的势力；主导者只写名字和所处位置
-      - name:
-        description:
+      <势力名>:
+        <方面>: <机制或现状>
     world_location:     # 新据点的大局位置；建筑细节归 location 节点
-      - name:
-        description:
+      <地名>:
+        <方面>: <机制或现状>
 
   # ── 第三层：法则，本分支独有、全线生效的世界级规则 ──
   core_rules:
-    - law_name:
-      definition: |     # 规则是什么、什么情况下触发、带来什么、有什么限度、能否逆转
+    <法则名>:           # 方面通常有：触发、效果、限度、能否逆转；按法则实际需要增删
+      <方面>: <条件 → 结果，例外>
+```
+
+示例（娘化宝可梦世界，按当前卡改写，不照抄）：
+
+```yaml
+core_systems:
+  精灵球:
+    收服: 野生个体体力越低越容易成功；已登记在训练家名下的个体收不进别人的球。
+    球内: 不进食、不衰老、伤势不恶化；连续在球内超过三天，出球后半天内方向感混乱。
+    归属: 球登记在联盟名下；转让要双方到宝可梦中心办理，私下转手的球在中心无法治疗。
+special_groups:
+  娘化宝可梦: 外形接近人类，保留原属性与招式，属性克制照常生效。   # 只需一句时直接写成值
 ```
 
 填写纪律：
 
 - 子模块按需启用，这是框架原有的做法。骨架是形状上限，不是必填清单。每个 key 只有四种状态：**有料**（正常写）／**原作没有答案**（写明此句）／**缺口**（标【缺口】并列入查料清单）／**作者已删**（只有作者能删模块或 key；Agent 一律不自行整项删除，不留空值，也不写「未知」）。
-- 条目偏离模型默认认知时，用三层递进：`name` 触发基础认知 → `definition` 一句定性 → `description` 收窄到本世界 → `examples`（可选）给场景素材。不偏离的条目只写 `name` 和一句 `description`。
+- 条目用自定义 key：条目名本身就是 key，下一层是这个条目自己的方面（如「收服」「球内」「归属」），每个方面写机制：条件、结果、数值、限度、例外。不套 `name` / `definition` / `description` 这类通用槽位；通用槽位会逼出复述名字的定义和回顾往事的描述。
+- 名字不足以说明它是什么、起什么作用时，在方面之前加一项 `定义:`，一句写完；只是把名字换个说法的定义不写。
+- 只讲过去发生了什么、对当下没有作用的内容不写；仍影响当下的往事，改写成现状或规矩写进对应方面。
+- 不偏离默认认知的条目写成一行 `条目名: 一句现状`，不展开方面。需要场景素材时，加一个 `场景素材` 方面。
 - 并列的子单元（几个国家、几个种族）各用「领域或功能 → 外观或标识 → 特色倾向」三要素锚定；没展开的子单元，模型会照已有的结构自己生成。
 - 框架要求「只写和默认认知不同的部分」，在基底层要这样理解：可以压缩，不可以缺席。压缩的判定问题只有一个：**这一项只写一句，模型在一个普通日常场景里会不会猜错？** 会猜错就要展开写；不会，就一句带过。压缩不是删除，删除只由作者执行。
 - 缺料先要料：基底里决定世界运转的那几项查不到时，标【缺口】并停下列出，不靠印象补齐。
@@ -104,7 +115,7 @@ worldview_profile:
 | 第 1 轮 · 方向 | 定 `world_foundation` 五项与用哪几层；`base_world` / `if_divergence` / `core_rules` 各只写一句话定位（要写什么、不写什么） |
 | 第 2 轮 · 事实 | 填各层条目的事实主体：名称、一句定性、关键数字与名称；人物只以主导者一句带过 |
 | 第 3 轮 · 条件 | 补条件与分支：`core_rules` 的触发条件、限度、能否逆转；社会结构的例外与边界；条目间的先后与制约 |
-| 第 4 轮 · 证据 | 对照事实矩阵核对每条出处；给 `examples` 补场景素材；出处存疑的改标【缺口】 |
+| 第 4 轮 · 证据 | 对照事实矩阵核对每条出处；需要的条目补 `场景素材` 方面；出处存疑的改标【缺口】 |
 | 第 5 轮 · 表达 | 按下方攻略式要求逐条改写；删同义复述；检查并列单元三要素是否齐 |
 
 攻略式写法（第 5 轮验收标准，前几轮不追求）：

@@ -2,7 +2,7 @@
 name: cf-card-oneclick
 description: 一键出卡：开头一次问清这张卡要什么，并提出这张卡的结构提案，确认后按 调研 → 世界书 → 角色 → 配套 → 审查 → 装配 自动跑完，中途不再询问；缺料和推断标记后继续，交付时统一列出。用户说「做一张卡」「一键出卡」「从头做整张卡」「整理已有卡」时使用。
 metadata:
-  version: 2.2.1
+  version: 2.3.0
   updated: 2026-10-19
 ---
 
@@ -38,7 +38,7 @@ metadata:
 | 2 世界书 | cf-card-worldbook | world / location / rule / item / lore 节点；条目触发配置 | 题材来源按出卡单定层数；世界节点在角色之前完成 |
 | 3 角色 | cf-card-character | character / module / corpus 节点 | 按直通式走，所有关口报告不停顿，并入交付报告 |
 | 4 配套 | cf-card-format-export | style / output / greeting 节点 | 只做出卡单勾选的部分；有状态栏时先定状态栏，再写开场白 |
-| 5 审查 | cf-card-review | 审查报告 | 能就地修的表达问题直接修；涉及事实、归属、上游层的问题不改，记入交付报告 |
+| 5 审查 | cf-card-review；表达问题按 cf-card-refine 改 | 审查报告 | 能就地修的表达问题直接修；涉及事实、归属、上游层的问题不改，记入交付报告 |
 | 6 装配 | cf-card-format-export 第四、五部分 | 卡文件、世界书、校验结果 | 原卡先备份再写；跑两个校验脚本并回读 |
 
 阶段之间只看上一阶段的产出，不回头重做已完成的阶段。发现上游问题时，在出问题的节点里标【缺口】或【提案】并继续，不在下游正文里打补丁掩盖。
