@@ -21,8 +21,8 @@ async function makeCard() {
     await fs.writeFile(path.join(dir, rel), text, 'utf8');
   };
   await w('card.md', node('id: card\ntype: card', '总纲里写机械也不查'));
-  await w('description.md', node('id: chr-a\ntype: character\nname: 绫音\ntarget: description', '角色正文'));
-  await w('world_book/王都.md', node('id: wld\ntype: world', '王都的地理。\n绫音喜欢在这里散步。'));
+  await w('description.md', node('id: chr-a\ntype: character\nname: 小满\ntarget: description', '角色正文'));
+  await w('world_book/王都.md', node('id: wld\ntype: world', '王都的地理。\n小满喜欢在这里散步。'));
   await w('message/0.md', node('id: greet\ntype: greeting\ntarget: first_mes',
     '严禁机械照抄。\n她的动作很机械。\n\n截然相反。\n\n瞳孔骤缩的一瞬。'));
   await w('world_book/基底文风.md', node('id: sty\ntype: style', '微微一笑，微微点头，微微侧身。\n她戴着面具说话。'));
@@ -40,7 +40,7 @@ test('lint：各规则命中、禁令句跳过、note 与卡根不查', async ()
   assert.ok(has('S3', 'message', '截然相反'));
   assert.ok(has('S6', 'message', '瞳孔骤缩'));
   assert.ok(has('S7', '基底文风', '微微 ×3'));
-  assert.ok(has('S12', '王都', '绫音'));
+  assert.ok(has('S12', '王都', '小满'));
   assert.ok(has('S12', '王都', '喜欢'));
   assert.ok(has('BW', '基底文风', '面具'));
   assert.ok(!hits.some(h => h.node === 'card.md' || h.node.startsWith('note')));

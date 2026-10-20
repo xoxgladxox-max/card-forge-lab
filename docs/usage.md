@@ -44,7 +44,7 @@ node src/cli.mjs migrate <旧卡目录> --out <新标准卡目录>   # 旧版节
 
 **migrate 说明**：输入是旧版节点树（根 `index.md`，`world/`、`character/`、`greeting/`、`output/`、`style/` 下任意层的 `<节点>/index.md`）。不改旧目录；输出目录须不存在或为空，且不能在旧目录里。
 
-- 去处：根 `index.md` → `card.md`；`target` 或旧写法 `position` 为 first_mes → `message/0.md`，其余 greeting → `message/<n>.md`（按 order、再按路径排）；description 等单槽字段 → `<字段>.md`；其余 → `world_book/<原路径>.md`，如 `world/设定百科/港口研究所/index.md` → `world_book/world/设定百科/港口研究所.md`。
+- 去处：根 `index.md` → `card.md`；`target` 或旧写法 `position` 为 first_mes → `message/0.md`，其余 greeting → `message/<n>.md`（按 order、再按路径排）；description 等单槽字段 → `<字段>.md`；其余 → `world_book/<原路径>.md`，如 `world/设定百科/钟楼/index.md` → `world_book/world/设定百科/钟楼.md`。
 - 保留：frontmatter 原文逐行保留，只补 id（已有不动），旧写法 `position: first_mes` 等改成 target；`enabled: false`、`scan_depth`、`probability`、`exclude_recursion`、`prevent_recursion` 另抄进 tavern 段，保证装卡生效。工序说明与正文逐字搬运；没有 `<!-- body -->` 时跳过开头的 `<!-- … -->` 注释和「## 工序」列表，第一行非列表内容起为正文，并补上标记。
 - 资料：顶层其他文件与目录（调研、决策记录、`note/`、`export/` 等）和节点目录里的 `note/`、非 index 文件，原样复制到 `记录/`；`backups/`、`dist/`、`.card-forge/` 不复制。顶层已有的 `card.md` 不当卡根，复制为 `记录/原card.md`。解析不了的节点进 `待归位/`，去处撞车的进 `候选/`。
 - 参照成品：`export/` 下只有一个 JSON 时拿它补缺失的 order、卡名、版本、卡级 extensions 和世界书名，并逐条比正文；成品里没有的条目迁移后设为停用。差异只报告不改。`export/` 下只有一个 PNG 时复制为 `character.png`。
@@ -90,7 +90,7 @@ target: description    # 可选；world 等类型默认进世界书
 - 标签名与类型对不上（P18a）、缺 name / part（P18b）、标题或 name 重复（P18d）、YAML 第一层没顶格（P18e）→ 警告。对照表见 node-protocol「标签与标题」。
 - 三明治是可选的：开头、收尾节点写 `wrap: head` / `wrap: tail`，P19 查常驻、`ignore_budget: true`、position 一致、首尾 order 在组内最小和最大。
 - 一个节点只出一个条目。要出多条（例：配角群里每人一条），建父节点加每人一个子节点，不要导出后另跑脚本拆，否则构建记录里的指纹对不上。
-- 世界书条目放在 `world_book/` 下，一条一个 `.md`；子目录只用于分组（如 `world_book/character/绫音口癖语料.md`）。旧版 `world/节点名/index.md` 写法不被读取，先用 `migrate` 迁移；直接对旧版目录跑 check / build 会报 P10 error。
+- 世界书条目放在 `world_book/` 下，一条一个 `.md`；子目录只用于分组（如 `world_book/character/小满口癖语料.md`）。旧版 `world/节点名/index.md` 写法不被读取，先用 `migrate` 迁移；直接对旧版目录跑 check / build 会报 P10 error。
 - 同一个关键词挂在多个节点 → P22 警告：一喊全响，常用词改更具体的专名。
 - `note/`、`state.md` 不导出。
 

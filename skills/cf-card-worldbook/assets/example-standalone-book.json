@@ -47,15 +47,15 @@
                     "1":  {
                               "uid":  1,
                               "key":  [
-                                          "/绫音|아야네|Ayane/i",
-                                          "绫音",
-                                          "音酱"
+                                          "/小满|Xiaoman/i",
+                                          "小满",
+                                          "满满"
                                       ],
                               "keysecondary":  [
 
                                                ],
-                              "comment":  "角色：绫音",
-                              "content":  "\u003cAyane\u003e\ncharacter:\n  name: 绫音\n  age: 17\n\u003c/Ayane\u003e",
+                              "comment":  "角色：小满",
+                              "content":  "\u003cXiaoman\u003e\ncharacter:\n  name: 小满\n  age: 17\n\u003c/Xiaoman\u003e",
                               "constant":  false,
                               "selective":  true,
                               "order":  100,
@@ -98,7 +98,7 @@
 
                                                ],
                               "comment":  "世界基底（常驻）",
-                              "content":  "\u003cWorld\u003e\n舞台是雨季永不结束的临海市。\n\u003c/World\u003e",
+                              "content":  "\u003cWorld\u003e\n舞台是每晚敲钟后进入夜禁的山间小镇晚钟镇。\n\u003c/World\u003e",
                               "constant":  true,
                               "selective":  true,
                               "order":  100,

@@ -121,13 +121,13 @@ id 建节点时一次性确定；工具发现缺 id 的节点只报告，不静�
 
 | 节点类型 | 包裹 | 必填属性 | title 例 |
 |---|---|---|---|
-| world / location / lore / rule / item | `<world name="…">`，其余类型同形，标签名即类型名 | name | 临海市世界观（顶层）、临海市世界时间线 |
-| character | `<character name="人物名">` | name | 绫音 |
-| module / corpus | `<character name="人物名" part="模块名">` | name、part | 绫音口癖语料 |
+| world / location / lore / rule / item | `<world name="…">`，其余类型同形，标签名即类型名 | name | 晚钟镇世界观（顶层）、晚钟镇世界时间线 |
+| character | `<character name="人物名">` | name | 小满 |
+| module / corpus | `<character name="人物名" part="模块名">` | name、part | 小满口癖语料 |
 | 配角群（一条多人） | 每人一个 `<character name="…">` | name | 配角群 |
 | style | `<style name="文风名">` | name | 雨季文风 |
 | plot（剧情） | `<plot name="…">` | name | 初次见面 |
-| wiki（设定百科） | `<lore name="…">`（沿用 lore 标签） | name | 港口研究所 |
+| wiki（设定百科） | `<lore name="…">`（沿用 lore 标签） | name | 钟楼 |
 | event（事件） | `<event name="…">`，可加其他属性（如 level） | name | 补给被截 |
 | output（进 description） | 不加包裹 | — | — |
 | output（进世界书） | `<output>` | — | 输出规范 |
