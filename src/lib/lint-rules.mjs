@@ -7,6 +7,7 @@ export const PROHIBITION = /严禁|禁止|不要|不许|不得|避免|别用|别
 export const NOT_AUTOMATED = {
   S9: '要先判断是否在官能块里',
   S10: '针对跑卡正文，不查卡文本',
+  S15: '「不是 X」要读上下文才知道有没有意义',
 };
 
 const WORLD_TYPES = new Set(['world', 'location', 'rule', 'item', 'lore']);
@@ -71,6 +72,27 @@ function s7() {
   };
 }
 
+// S14：开场白里一句话「的」超过两个，或出现「的的」（先去掉「的确」）
+function s14() {
+  return {
+    id: 'S14', name: '「的」字堆叠', scope: isGreeting,
+    check(lines) {
+      const hits = [];
+      for (const l of lines) {
+        if (!l.text.trim()) continue;
+        const words = [];
+        for (const s of l.text.replace(/的确/g, '').split(/[。！？!?；;…]/)) {
+          const n = s.split('的').length - 1;
+          if (s.includes('的的')) words.push('的的');
+          else if (n > 2) words.push(`「的」×${n}`);
+        }
+        if (words.length) hits.push({ line: l.no, words: uniq(words), text: l.text.trim() });
+      }
+      return hits;
+    },
+  };
+}
+
 // banned-words.md「按行当分的黑名单」表 → [{ group, words }]
 export function parseBannedWords(md) {
   const text = md.replaceAll('\r\n', '\n');
@@ -108,6 +130,8 @@ export function buildRules({ banned = [], names = [] } = {}) {
         wordsIn([...names, '穿越', '身世', '出身', '性格', '喜欢', '讨厌', '口癖', '战力', '数值', '面板', '好感', '心理']),
         { skipProhibition: false }),
     },
+    lineRule('S13', 'AI 套话', any, wordsIn(['不禁', '油然而生', '仿佛', '宛如', '这一刻', '值得注意的是'])),
+    s14(),
   ];
   for (const g of banned) {
     rules.push(lineRule('BW', `黑名单·${g.group}`, any, wordsIn(g.words)));
@@ -115,4 +139,4 @@ export function buildRules({ banned = [], names = [] } = {}) {
   return rules;
 }
 
-export const AUTOMATED_S = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S11', 'S12'];
+export const AUTOMATED_S = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S11', 'S12', 'S13', 'S14'];
