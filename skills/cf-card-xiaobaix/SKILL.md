@@ -1,12 +1,12 @@
 ---
 name: cf-card-xiaobaix
-description: v1.0.0｜小白X（LittleWhiteBox）角色卡前端与循环任务构建：纯小白X架构（零酒馆助手依赖）、<<taskjs>> 循环任务挂载、LWB_StateV2 与 variables.local 状态同步、<status> 楼层 HUD 正则联动、三层场景状态机、属性阈值解锁，以及本地美术素材 Base64 打包与独立 HTML 预览。用户说「做小白X前端」「写 taskjs」「小白X任务」「做交互终端」「养成前端」「状态栏 HUD」「打包前端素材」时使用。
+description: v1.1.0｜小白X（LittleWhiteBox）角色卡前端与循环任务构建：纯小白X架构（零酒馆助手依赖）、<<taskjs>> 循环任务挂载、LWB_StateV2 与 variables.local 状态同步、楼层胶囊条与隐藏状态容器、终端内剧情正文阅读框、无图期 CG 折叠槽、桌面双栏与手机四 Tab 自适应、游戏化展示与叙事行动分层、前端随机与保底、三层场景状态机、属性阈值解锁，以及本地美术素材 Base64 打包与独立 HTML 预览。用户说「做小白X前端」「写 taskjs」「小白X任务」「做交互终端」「养成前端」「状态栏 HUD」「打包前端素材」时使用。
 metadata:
-  version: 1.0.0
+  version: 1.1.0
   updated: 2026-10-21
 ---
 
-# 小白X角色卡前端与任务构建（v1.0.0）
+# 小白X角色卡前端与任务构建（v1.1.0）
 
 范围：角色卡内嵌的小白X（LittleWhiteBox）循环任务（`xiaobaix-tasks`）、全屏交互终端、楼层状态栏 HUD 正则、状态变量读写（`LWB_StateV2` 与 `variables.local`）、场景与属性养成状态机，以及本地美术素材的分离打包与独立预览。
 
@@ -25,7 +25,7 @@ metadata:
 D:\cards\<卡名>\
 ├── regex/
 │   ├── 01-状态栏HUD.json         # 楼层内 <status> 美化正则配置
-│   └── 01-状态栏HUD.html         # replaceString：渲染成内嵌 HUD 条 + 隐藏原 <status>
+│   └── 01-状态栏HUD.html         # replaceString：一行胶囊条 + 隐藏状态容器
 └── scripts/
     └── xiaobaix-tasks.json       # 小白X循环任务（构建时自动写入 data.extensions['xiaobaix-tasks']）
 ```
@@ -95,18 +95,24 @@ D:\cards\<卡名>\
 - `setTimeoutSafe(fn, ms)` / `clearTimeoutSafe(id)` / `setIntervalSafe(fn, ms)` / `clearIntervalSafe(id)`：受托管定时器，任务中止时自动清理。
 - `abortSignal`：当前任务实例的 `AbortSignal`；同名任务再次触发时，小白X会先 `abort` 旧实例再启动新实例（若任务名以 `[x]` 开头则视为轻量任务，不等待旧 Promise 结束）。
 
-## 2. `regex/01-状态栏HUD.json` + `.html` 配合规范
+## 2. `regex/01-状态栏HUD.json` + `.html`：楼层胶囊条与隐藏状态容器
 
-- `.json` 配置中设置 `"placement": [1, 2]`（作用于用户与 AI 消息）、`"markdownOnly": true`、`"promptOnly": false`（只美化网页显示，不改动发给模型的上下文）。
-- `.html`（即 `replaceString`）末尾**必须原样保留隐藏的原始 `<status>` 标签**：
+楼层里不渲染大面板，也不保留 `[▓▓▓░░░]` 这类 ASCII 进度条。每个楼层只显示一行 32~36px 高的胶囊条，完整状态放在终端里看。
+
+- `.json` 设置 `"placement": [2]`（只处理 AI 楼层；用户楼层也写状态时改 `[1, 2]`）、`"markdownOnly": true`、`"promptOnly": false`，只改网页显示，不改发给模型的上下文。
+- `.html`（即 `replaceString`）结构：
   ```html
-  <div class="ct-hud-bar" onclick="if(window.parent&&window.parent.openCardTerminal){window.parent.openCardTerminal();}else if(window.openCardTerminal){window.openCardTerminal();}">
-    <span>位置：$1</span><span>阶段：$2</span><span>好感：$3</span>
-    <button type="button">打开终端</button>
-  </div>
-  <span style="display:none;"><status>[位置: $1 | 阶段: $2 | 好感: $3]</status></span>
+  <div class="card-floor-bar"><span>✦ $1 · $2</span><button type="button" data-ct-open="1">打开终端</button></div>
+  <div class="card-raw-status" style="display:none;">$0</div>
   ```
-- 原因：开启美化正则后，楼层 DOM 的 `.textContent` 会丢失 `<status>` 标签字样；保留 `<span style="display:none;"><status>...</status></span>` 后，前端脚本扫描 `.innerHTML` 时仍能无损提取完整状态。
+- 隐藏容器用 `$0`（或 `{{match}}`，酒馆会换成 `$0`）放回整段原始匹配。不要把捕获组 `$1`、`$2` 拼回一个手写的 `<status>` 标签，捕获内容里有未闭合标签或特殊符号时会弄坏楼层 DOM。
+- 酒馆渲染楼层 HTML 时会经过 DOMPurify 净化（`MESSAGE_SANITIZE`），有三点影响：
+  - `onclick` 等内联事件属性会被删掉。胶囊按钮只写 `data-ct-open`，由终端脚本在顶层文档上用事件委托接管点击。
+  - `class="x"` 会被改写成 `class="custom-x"`（`fa-`、`note-` 开头的除外）。脚本查节点时两种写法都要认，例如 `.card-raw-status, .custom-card-raw-status`。正则 `.html` 里自带的 `<style>` 选择器也会被自动加 `.custom-` 前缀，写样式时按原名写即可。
+  - `<status>` 属于未知标签，内部换行会被转成 `<br>`。所以从 DOM 读状态时读隐藏容器的 `textContent`，不靠 `innerHTML` 匹配 `<status>` 字样。
+- 终端脚本分两路取数据：
+  - 结构化状态：先读 `SillyTavern.getContext().chat` 最近几条消息原文里的 `<status>`（不受显示正则影响），没有再读 `.card-raw-status` 的 `textContent`。
+  - 楼层纯正文：克隆最后一个 AI 楼层的 `.mes_text` 节点，删掉胶囊条、隐藏状态容器、`style`、`script` 后取文本。克隆节点不在文档里，`innerText` 不会分行，需要先把 `<br>` 和块级元素换成换行再取 `textContent`。
 
 ## 3. 小白X角色模板（`xiaobaix-template`）与 `<<taskjs>>` 选型边界
 
@@ -199,54 +205,158 @@ function syncStateBlock(stateObj) {
 }
 ```
 
-## 3. 从聊天记录与 DOM 双通道提取 `<status>`
+## 3. 楼层状态与正文的提取
 
-先扫描 `SillyTavern.getContext().chat` 最近 6 条消息的原始文本（不受显示正则影响），若未命中再扫描页面 `.mes_text, .mes, .msg` 的 `innerHTML || textContent`：
+状态先读聊天记录原文，再读隐藏容器；正文先读最后一个 AI 楼层的 `.mes_text` 克隆，再回退聊天记录原文（完整实现见模板第 4 节）：
 
 ```javascript
 var STATUS_RE = /<status>\s*\[?([\s\S]*?)\]?\s*<\/status>/i;
+function classSel(name) { return '.' + name + ', .custom-' + name; }
+
 function readLatestStatus() {
-  var c = stCtx();
-  var msgs = (c && Array.isArray(c.chat)) ? c.chat.slice(-6) : [];
+  var msgs = chatMessages().slice(-6);
   for (var i = msgs.length - 1; i >= 0; i--) {
-    var raw = String((msgs[i] && (msgs[i].mes || msgs[i].message || msgs[i].content)) || '');
-    var m = raw.match(STATUS_RE);
+    var m = rawText(msgs[i]).match(STATUS_RE);
     if (m) return parseStatusBody(m[1]);
   }
-  try {
-    var nodes = topDoc.querySelectorAll('.mes_text, .mes, .msg');
-    for (var j = nodes.length - 1; j >= 0; j--) {
-      var m2 = String(nodes[j].innerHTML || nodes[j].textContent || '').match(STATUS_RE);
-      if (m2) return parseStatusBody(m2[1]);
-    }
-  } catch (e) {}
+  var raws = topDoc.querySelectorAll(classSel('card-raw-status'));
+  for (var j = raws.length - 1; j >= 0; j--) {
+    var t = String(raws[j].textContent || '');
+    var m2 = t.match(STATUS_RE);
+    var body = m2 ? m2[1] : t.trim().replace(/^\[/, '').replace(/\]$/, '');
+    if (body.trim()) return parseStatusBody(body);
+  }
   return null;
+}
+
+function readLatestNarrative() {
+  var nodes = topDoc.querySelectorAll('#chat .mes[is_user="false"] .mes_text');
+  if (!nodes.length) return '';
+  var clone = nodes[nodes.length - 1].cloneNode(true);
+  clone.querySelectorAll(classSel('card-floor-bar') + ', ' + classSel('card-raw-status') + ', style, script')
+    .forEach(function (n) { n.remove(); });
+  return nodeToText(clone); // 先把 <br> 与块级元素换成换行，再取 textContent
 }
 ```
 
 ## 4. 行动文本「填入输入框」与「直接发送」双按钮
 
-前端底部操作栏同时提供「填入输入框（允许玩家补充修改后再发）」与「直接发送」两个按钮，不强行替玩家直接发出：
+底栏同时提供两个按钮，不替玩家自动发出：
+
+- 填入输入框：写入 `#send_textarea` 并触发 `input`、`change`，关闭终端，让玩家在酒馆输入框里继续改。
+- 直接发送：写入后延迟约 60ms 点击 `#send_but`，终端保持打开，玩家留在终端里等下一轮正文。
 
 ```javascript
 function fillInput(txt) {
   var ta = topDoc.querySelector('#send_textarea');
-  if (!ta) return false;
+  if (!txt || !ta) return false;
   ta.value = txt;
   ta.dispatchEvent(new topWin.Event('input', { bubbles: true }));
   ta.dispatchEvent(new topWin.Event('change', { bubbles: true }));
-  try { ta.focus(); } catch (e) {}
+  root.classList.remove('open');
+  ta.focus();
   return true;
 }
 function sendInput(txt) {
-  if (!fillInput(txt)) return false;
+  var ta = topDoc.querySelector('#send_textarea');
   var btn = topDoc.querySelector('#send_but');
-  topWin.setTimeout(function () { if (btn) btn.click(); }, 60);
+  if (!txt || !ta || !btn) return false;
+  ta.value = txt;
+  ta.dispatchEvent(new topWin.Event('input', { bubbles: true }));
+  topWin.setTimeout(function () { btn.click(); }, 60);
   return true;
 }
 ```
 
-# 三、交互终端与场景状态机设计法则
+## 5. 事件与定时器的卸载
+
+终端挂在顶层文档上的监听（楼层胶囊点击委托、`resize`）和定时器（正文轮询），必须在 `topDoc[MOUNT_KEY]` 里逐一移除。否则同名任务重跑一次，就多一份监听，点一次胶囊会打开多次。也可以改用沙箱注入的 `addListener` 与 `setIntervalSafe`，由小白X在任务中止时清理。
+
+# 三、终端布局与阅读体验
+
+## 1. 终端内置剧情正文阅读框
+
+全屏终端会盖住聊天楼层。如果终端里只有数值和按钮，玩家每轮都要关终端看正文、再开终端选行动。做法：
+
+- 左栏主体是「本轮剧情正文」滚动框，占左栏高度的 70%~75% 以上（CG 槽折叠时铺满），字号 14.5~15px，行高 1.85~1.95。
+- 用轻量正则给 `「台词」` 与 `（旁白 / 译文）` 各加一种颜色。高亮前先做 HTML 转义，再套 `<span>`。
+- 正文在三个时机刷新：打开终端时、`after_ai` 同步任务调用 `__cardTerminalSync` 时、终端打开期间每 2 秒轮询一次（跟上流式输出与重新生成）。内容没变时不重绘，避免滚动位置被重置。
+
+## 2. 无图期的紧凑布局与 CG 折叠槽
+
+制卡初期通常还没有立绘和 CG。按有图布局预留半屏画面，只能放占位图标。做法：
+
+- 顶栏左侧放 44×44 小头像徽章（有 `av_main` 素材用图，没有用一个字符），正文框铺满左栏。
+- 场景背景、立绘、画面热点放进一个默认 `height: 0; overflow: hidden;` 的折叠层 `#cg-layer`。顶栏和正文框右上角各放一个 `▣ CG预留: 关/开` 开关，展开后高 240~260px。开关状态写入变量，下次打开保持。
+- 折叠时不渲染立绘和热点；画面热点同时以按钮组出现在「行动」页顶部，无图期也能用。
+- 后期把 `cg_xxx`、`bg_xxx`、`sp_xxx` 放进 `assets/` 重新打包，打开开关即可，不改布局代码。
+
+## 3. 桌面双栏与手机单屏四 Tab
+
+手机竖屏把双栏简单改成上下堆叠，上下两块各只剩一半高度，两边都不好滚动。做法：
+
+- 根容器写 `height: 100vh; height: 100dvh;`，适配手机浏览器会伸缩的地址栏。根容器用纵向 flex：顶栏 / 主体 / 底栏，主体 `flex: 1; min-height: 0`，内部滚动区也要 `min-height: 0`，否则 flex 子项不会出现滚动条。
+- 桌面（大于 820px）：左栏常驻（CG 槽 + 正文），右栏 3 个 Tab（行动 / 场景 / 档案），第一个 `.mob-only` 的「✦ 剧情正文」Tab 隐藏。
+- 手机（`@media (max-width: 820px)`）：显示 4 个 Tab。切到「剧情正文」时只显示左栏；切到其余 3 个时隐藏左栏，功能面板占满整屏高度。手机打开终端时默认停在正文 Tab。
+- 手机顶栏状态药丸单独占一行，`flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;` 横向滑动。底栏第一行是全宽输入框，第二行两个按钮对半。
+- 从手机宽度变回桌面宽度时，如果当前 Tab 是正文，自动切回「行动」，避免右栏空白。
+
+## 4. 视觉防踩坑
+
+- 背景切换禁用 `transition: background-image`：背景是数百 KB 的 Base64 Data URL 时，Chromium 下会卡在旧图不刷新。直接替换 `style.backgroundImage`，过渡靠前景遮罩或立绘透明度。
+- 同框立绘比例：主立绘是全身像（`height: 86%~88%`）、副立绘是半身像时，副立绘高度按头身比缩到 `44%~48%`，避免副角色头部比主角色大一倍。
+- 立绘档位只保留当前玩法用得到的（如单人 / 双人同框 / 纯场景，或情绪差分）。
+- 终端所有插入 `innerHTML` 的文本（状态值、正文、配置里的标题）先转义。状态值和正文来自 AI 输出，可能带 `<`、`&`。
+
+# 四、游戏化前端与 AI 上下文
+
+## 1. 展示层与叙事行动层分开
+
+前端可以做稀有度徽章、概率公示、十连网格、购物车总价这类游戏化反馈。但发给 AI 的文本如果带着「抽到 SSR」「保底」「商店」这类系统词，AI 会在正文里报系统名、解释规则。做法：
+
+- 每张卡面、商品、行动的数据拆成两层：
+  - 展示层：`r`（稀有度）、`title`、`desc`、`gain`、`reqText`，只在前端界面显示。
+  - 叙事行动层：`act`（模板里叫 `prompt`），是点击后装填进输入框的文本。
+- `act` 只写角色在当前场景里会做的自然行动，不出现稀有度、概率、价格、属性名、「【阶段突破】」一类界面标签。
+- 不代写 {{user}} 的心理和连续决定。`act` 写成一个行动的起点，玩家可以在草稿框里继续改。
+
+示例（按当前卡改写）：
+
+```javascript
+{ r: 'SSR', title: '糖果券 · 午后特权', desc: '可提出一个小请求', act: '把口袋里那张盖了印的糖果券递过去，提醒她这张券今天还没用。' }
+```
+
+## 2. 随机结果由前端决定
+
+LLM 掷骰会偏向固定几项或无视概率。抽卡、掉落、事件抽取等随机结果全部在前端 JS 里算好，再把结果对应的 `act` 发给 AI。
+
+- 用 `crypto.getRandomValues` 取随机数（不可用时回退 `Math.random`）。
+- 保底状态 `pity`（距上次最高稀有度的抽数）与 `totalPulls` 用 `varSet` 持久化，切聊天或重载不丢。
+- 文字卡一局常见 5~15 轮，保底参数按短局设计。以下是一组参考值，按当前卡节奏调整：
+  - 硬保底：25~30 抽必出最高稀有度。
+  - 软保底：第 15 抽起，每抽最高稀有度概率 +6%、次高稀有度 +3%。
+  - 十连：至少一张 SR 及以上。
+- 抽完做三件事：把 `act` 装填进草稿框；把结果写进状态变量（例如角色专属字段「刚抿出的物品」）；用 `varSet` 持久化 `pity`。状态变量里写物品的场景内名称，不写稀有度。
+
+```javascript
+function rand01() {
+  try { var a = new Uint32Array(1); topWin.crypto.getRandomValues(a); return a[0] / 4294967296; }
+  catch (e) { return Math.random(); }
+}
+function rollOneCard(state, cfg) {
+  state.pity += 1; state.totalPulls += 1;
+  var soft = Math.max(0, state.pity - cfg.softStart + 1);
+  var pTop = state.pity >= cfg.hardPity ? 1 : cfg.base.UR + soft * cfg.softStep.UR;
+  var pSSR = cfg.base.SSR + soft * cfg.softStep.SSR;
+  var x = rand01();
+  var r = x < pTop ? 'UR' : x < pTop + pSSR ? 'SSR' : x < pTop + pSSR + cfg.base.SR ? 'SR' : x < pTop + pSSR + cfg.base.SR + cfg.base.R ? 'R' : 'N';
+  if (r === 'UR') state.pity = 0;
+  var pool = cfg.pool[r];
+  return pool[Math.floor(rand01() * pool.length)];
+}
+```
+
+# 五、交互终端与场景状态机设计法则
 
 针对带据点日常、多场景切换或属性成长的角色卡，前端交互不应做成无限制随意瞬移的旅游地图，而应根据卡片核心体验采用以下三层状态机与属性阈值机制：
 
@@ -254,7 +364,7 @@ function sendInput(txt) {
 
 | 层级 | 触发条件 | 玩家权限与前端表现 |
 |---|---|---|
-| 常驻主舞台（主场景昼/夜） | 默认常驻（`<status>` 的 `位置` 处于主舞台内） | 右下角常驻开放 `☀ 主场景·昼` 与 `☽ 主场景·夜`；画面中央渲染场景物件交互热点（桌案、床铺、书架、器物等），右侧面板列出日常互动与修习行动 |
+| 常驻主舞台（主场景昼/夜） | 默认常驻（`<status>` 的 `位置` 处于主舞台内） | 「场景」页开放 `☀ 主场景·昼` 与 `☽ 主场景·夜`；场景物件热点（桌案、床铺、书架、器物等）在 CG 槽展开时标在画面上，同时以按钮组出现在「行动」页；「行动」页列出日常互动 |
 | 每日限次外出窗口 | 每日限 `1/1` 次（对应自由活动时段或看护空档） | 点击 `✦ 自由外出 (1/1)` 弹出外部场景选择面板；进入外部场景选定一次行动后，当日次数立即扣减为 `■ 今日外出已用 (0/1)`，直至切到夜间点击 `↻ 入眠进入次日` 才重置回 `1/1` |
 | 强制事件场景（锁定） | 当 `<status>` 的 `位置` 变为特殊外部场所，或触发强制剧情事件 | 自动切入对应场景背景，顶部挂出醒目横幅 `⚠ 强制事件进行中 · 不可自选离开`；期间锁死主舞台切换与自由外出，行动列表只展示该强制事件下的应对选项，直至下一轮 `<status>` 位置回到主舞台才自动解除锁定 |
 
@@ -266,18 +376,15 @@ function sendInput(txt) {
   2. **未达标带锁项（`.lock`）**：在列表中以**半透明虚线框**展示，直接写明解锁条件（如 `■ 需 属性A ≥ 25 · 好感 ≥ 60`），不隐藏条目，让玩家明确知道当前该刷哪项日常。
   3. **已解锁突破/里程碑项（`.open`）**：属性达标后自动点亮为高亮边框选项（`✦`），点击后装填对应的突破剧情行动，并在档案抽屉里点亮对应的里程碑徽章（`.lit`）。
 
-## 3. 视觉与布局防踩坑四条规则
+## 3. 前端阈值与 AI 状态的关系
 
-- **背景切换禁用 `transition: background-image`**：当背景是数百 KB 的 Base64 Data URL 时，在 Chromium 下给背景容器加 `transition: background-image .5s ease` 会导致切场景时画面卡在旧图不刷新；背景应直接替换 `style.backgroundImage`，靠前景遮罩或立绘 `.fade` 透明度过渡。
-- **底部栏左右分区防重叠**：左下角固定放置行动草稿栏 `#ct-foot`（行动预览输入框 + `填入输入框` + `直接发送`，宽 `min(460px, 44vw)`），右下角固定放置场景切换栏 `#ct-map`（`right: 3%; left: auto; transform: none`），两侧严禁同时使用 `bottom: 14px; left: 50%`。
-- **同框立绘比例对齐**：主立绘若为全身像（`height: 86%~88%`），副立绘若为半身像，副立绘容器高度必须按头身比缩放到 `height: 44%~48%`，避免副角色头部比主角色大一倍或遮挡画面中央的交互热点。
-- **立绘档位聚焦当前玩法**：立绘切换按钮只保留贴合当前玩法的档位（如 `主角色单人` / `双人同框` / `纯实景视野` 或情绪差分），不塞入与当前场景无关的形态。
+属性数值以 AI 每轮输出的 `<status>` 为准，前端只读取和判断阈值，不自行给属性加减。前端自己维护的只有界面状态（昼夜、外出次数、CG 开关、立绘档位、已点亮徽章、抽卡保底）。两类状态不要混在一个字段里。
 
-# 四、本地素材打包与独立预览工作流
+# 六、本地素材打包与独立预览工作流
 
 当角色卡包含多张立绘、场景背景、CG 与徽章图标时，不要手写巨型 Base64 字符串，直接使用本技能自带的模板与打包脚本：
 
-- 前端骨架模板：`references/terminal-template.src.js`（已内置顶层窗口穿透、幂等卸载、四通道变量同步、`<status>` 双通道解析、三层场景状态机、三档行动列表、档案徽章抽屉、立绘切换与离线调试钩子，留有 `var ASSETS = __ASSETS__;` 占位）。
+- 前端骨架模板：`references/terminal-template.src.js`（已内置顶层窗口穿透、幂等卸载、四通道变量同步、状态与正文提取、剧情正文阅读框、CG 折叠槽、桌面双栏与手机四 Tab、楼层胶囊点击委托、三层场景状态机、三档行动列表、档案徽章与离线调试钩子，留有 `var ASSETS = __ASSETS__;` 占位）。模板不含抽卡模块，需要时按第四节加。
 - 一键打包脚本：`scripts/pack-xiaobaix.mjs`（零第三方依赖，Node.js 原生可跑）。
 
 ## 1. 素材目录约定（`assets/`）
@@ -286,8 +393,7 @@ function sendInput(txt) {
 
 ```
 assets/
-├── logo.png                # 左上角终端标题 Logo
-├── av_main.png             # 主角色状态栏头像
+├── av_main.png             # 顶栏 44×44 头像徽章（没有时显示字符）
 ├── sp_main.png             # 主角色透明底立绘（可追加 sp_main_alt.png 等差分）
 ├── sp_sub.png              # 副角色或玩家载体透明底立绘（可选）
 ├── bg_main_day.webp        # 常驻主舞台：昼
@@ -302,8 +408,9 @@ assets/
 
 ## 2. 从模板定制并执行一键打包
 
-1. 复制本技能的 `references/terminal-template.src.js` 到工作目录（如 `terminal.src.js`），按当前角色卡的实际设定修改顶部的 `CARD_CONFIG`（标题、状态字段映射、主舞台热点、外部场景列表、日常与突破行动表、里程碑徽章表）。
-2. 运行本技能自带的打包脚本：
+1. 复制本技能的 `references/terminal-template.src.js` 到工作目录（如 `terminal.src.js`），按当前角色卡的实际设定修改顶部的 `CARD_CONFIG`（标题、楼层 class 名、正文高亮规则、CG 槽高度、状态字段映射、主舞台热点、外部场景列表、日常与突破行动表、里程碑徽章表）。
+2. 只改 `.src.js` 这一份源码。打包脚本只做 `__ASSETS__` 词法替换，不剥离注释、不压缩。不要在 Node 或 Python 脚本里用模板字符串拼接前端 JS，也不要对整段 JS 做按行 `#` 或 `//` 的注释剥离，这类处理会误伤颜色值 `#ff4d8d`、URL 和正则字面量。
+3. 运行本技能自带的打包脚本：
 
 ```bash
 node "<本技能目录>/scripts/pack-xiaobaix.mjs" \
@@ -317,22 +424,30 @@ node "<本技能目录>/scripts/pack-xiaobaix.mjs" \
 
 1. 将 `./assets` 下所有图片转为 `data:image/...;base64,...` 字典注入 `__ASSETS__`（若传入 `--fallback-assets ./old-assets.json` 则自动补齐未替换的旧图）；
 2. 生成标准双兼容结构的 `D:/cards/<卡名>/scripts/xiaobaix-tasks.json`（含 `chat_changed` 挂载任务与 `after_ai` 自动同步任务）；
-3. 在源码同目录生成可双击离线运行的 `preview.html`，支持 URL 参数快速验证三态：
+3. 在源码同目录生成可双击离线运行的 `preview.html`（内含模拟 AI 楼层、胶囊条与隐藏状态容器），支持 URL 参数：
    - `preview.html`：默认初始状态（主舞台·昼，自由外出 `1/1`，未达标项带锁）；
    - `preview.html?mid=1`：中后期状态（属性达标，进阶行动 `.open` 与里程碑徽章点亮）；
-   - `preview.html?freepop=1`：自动打开每日自由外出场景选择面板；
-   - `preview.html?forced=1`：模拟 `<status>` 位置进入强制事件场景，验证顶部锁定横幅与退出限制。
+   - `preview.html?freepop=1`：打开「场景」页的外出目的地列表；
+   - `preview.html?forced=1`：模拟 `<status>` 位置进入强制事件场景，验证锁定横幅与退出限制；
+   - `preview.html?cg=1`：展开 CG 槽；
+   - `preview.html?tab=story`：指定初始 Tab（`story` / `actions` / `scene` / `archive`）。手机布局用浏览器开发者工具的设备模式看。
 
-# 五、交付前核查清单
+# 七、交付前核查清单
 
 - [ ] `scripts/` 下只有 `xiaobaix-tasks.json`，未混入酒馆助手脚本或 `variables.json`。
 - [ ] `xiaobaix-tasks.json` 同时包含 `tasks` 与 `character_tasks`，且主挂载任务的 `triggerTiming` 为 `"chat_changed"`、`buttonActivated` 为 `true`。
-- [ ] `regex/` 状态栏美化正则设置 `"markdownOnly": true`、`"promptOnly": false`，且 `.html` 末尾保留了 `<span style="display:none;"><status>...</status></span>`。
-- [ ] 前端脚本通过 `topDoc[MOUNT]` 实现了重复执行的幂等卸载，不会叠加多个悬浮球或定时器和监听。
-- [ ] 背景切换未使用 `transition: background-image`，左下操作栏与右下场景栏互不重叠。
-- [ ] `preview.html` 的默认态、`?mid=1`、`?freepop=1`、`?forced=1` 四个状态均无语法报错。
+- [ ] `regex/` 状态栏正则设置 `"markdownOnly": true`、`"promptOnly": false`；`.html` 只渲染一行胶囊条，隐藏容器用 `$0`；胶囊按钮用 `data-ct-open`，不写 `onclick`。
+- [ ] 脚本查楼层节点时同时认 `.x` 与 `.custom-x`。
+- [ ] 终端内有剧情正文阅读框，正文里不含胶囊条和状态文本。
+- [ ] 插入 `innerHTML` 的状态值与正文已转义。
+- [ ] 发给 AI 的 `act` / `prompt` 文本里没有稀有度、概率、价格、属性名等界面词。
+- [ ] 有随机结果时由前端计算，保底状态已持久化。
+- [ ] `topDoc[MOUNT_KEY]` 卸载时移除了 DOM、样式表、顶层文档与窗口上的监听和定时器。
+- [ ] 背景切换未使用 `transition: background-image`。
+- [ ] 桌面宽度与 820px 以下两种布局都能滚动正文和功能面板。
+- [ ] `preview.html` 的默认态与 `?mid=1`、`?freepop=1`、`?forced=1`、`?cg=1` 无报错。
 
 # 资源
 
 - `scripts/pack-xiaobaix.mjs`：将本地 `assets/` 目录图片打包为 Base64 注入 `terminal.src.js`，并同步生成 `<卡工程>/scripts/xiaobaix-tasks.json` 与离线调试页 `preview.html`。
-- `references/terminal-template.src.js`：通用小白X全屏交互终端完整源码骨架（含 `CARD_CONFIG` 配置区、顶层穿透、四通道变量同步、三层场景状态机、三档行动列表、档案抽屉与 `?mid=1`/`?freepop=1`/`?forced=1` 调试支持）。
+- `references/terminal-template.src.js`：通用小白X全屏交互终端完整源码骨架（含 `CARD_CONFIG` 配置区、顶层穿透、四通道变量同步、剧情正文框、CG 折叠槽、桌面双栏与手机四 Tab、三层场景状态机、三档行动列表、档案徽章与离线调试参数）。

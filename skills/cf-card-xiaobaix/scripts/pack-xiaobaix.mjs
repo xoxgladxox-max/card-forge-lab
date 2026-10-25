@@ -119,7 +119,9 @@ function buildPreviewHtml(compiledJs, title) {
     .mock-bar a { color: #88c0d0; text-decoration: none; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,.06); }
     .mock-bar a:hover { background: rgba(136,192,208,.2); }
     .mock-host { padding: 60px 24px 24px; max-width: 760px; margin: 0 auto; }
-    .mes_text { background: #181c24; border: 1px solid #2a303c; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; }
+    .mes_text { background: #181c24; border: 1px solid #2a303c; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; line-height: 1.8; }
+    .card-floor-bar { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; margin-top: 10px; border-radius: 999px; background: rgba(136,192,208,.12); border: 1px solid rgba(136,192,208,.35); font-size: 12px; }
+    .card-floor-bar button { margin-left: auto; background: #5e81ac; color: #fff; border: none; border-radius: 999px; padding: 3px 12px; cursor: pointer; }
     .mock-input { display: flex; gap: 8px; }
     #send_textarea { flex: 1; min-height: 54px; background: #181c24; color: #e5e9f0; border: 1px solid #2a303c; border-radius: 6px; padding: 8px; }
     #send_but { padding: 0 18px; background: #5e81ac; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
@@ -132,9 +134,11 @@ function buildPreviewHtml(compiledJs, title) {
     <a href="?mid=1">中后期解锁 (?mid=1)</a>
     <a href="?freepop=1">自由外出弹窗 (?freepop=1)</a>
     <a href="?forced=1">强制事件锁定 (?forced=1)</a>
+    <a href="?cg=1">CG 槽展开 (?cg=1)</a>
+    <a href="?tab=story">正文 Tab (?tab=story)</a>
   </div>
-  <div class="mock-host">
-    <div class="mes_text" id="mock-mes"></div>
+  <div class="mock-host" id="chat">
+    <div class="mes" is_user="false"><div class="mes_text" id="mock-mes"></div></div>
     <div class="mock-input">
       <textarea id="send_textarea" placeholder="酒馆输入框模拟 (#send_textarea)..."></textarea>
       <button id="send_but" type="button" onclick="alert('已触发发送：\\n' + document.getElementById('send_textarea').value)">发送</button>
@@ -149,7 +153,11 @@ function buildPreviewHtml(compiledJs, title) {
       } else if (qs.get('forced') === '1') {
         statusText = '<status>[位置: 外部场景二 | 阶段: 阶段一 | 好感: 35 | 属性A: 25 | 属性B: 20 | 属性C: 15]</status>';
       }
-      document.getElementById('mock-mes').innerHTML = '<div>模拟楼层消息</div><span style="display:none;">' + statusText + '</span>';
+      var story = '<p>窗外的光线移到书案一角。角色合上手里的本子，抬眼看过来。</p>' +
+        '<p>「今天的安排就这些，你还有什么想问的？」</p>' +
+        '<p>（声音不高，像是在等一个回答。）</p>';
+      var bar = '<div class="card-floor-bar"><span>✦ 阶段一 · 主房间</span><button type="button" data-ct-open="1">打开终端</button></div>';
+      document.getElementById('mock-mes').innerHTML = story + bar + '<div class="card-raw-status" style="display:none;">' + statusText + '</div>';
     })();
   </script>
   <script>
