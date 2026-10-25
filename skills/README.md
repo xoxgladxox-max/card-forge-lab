@@ -1,4 +1,4 @@
-# skills/：我们自己的技能（8 个，cf- 前缀）
+# skills/：我们自己的技能（9 个，cf- 前缀）
 
 这里是技能原件，只保留一份。可以手工复制到所用 AI 工具的技能目录，也可以用 tt-card-bridge 同步到 Claude Code（`~/.claude/skills/`）、Codex 等通用目录（`~/.agents/skills/`）和酒馆。通用工具纪律、思考辅助和其他项目的技能由宿主管理，不放在这里。
 
@@ -32,6 +32,7 @@
 | cf-card-review | 审查 | 成文检查：静态规则和语境规则 |
 | cf-card-refine | 精炼 | 条目改成自定义 key 加方面机制；角色设定从上位概念逐层收窄；删不起作用的句子 |
 | cf-card-format-export | 配套 | 文风、回复格式与状态栏、开场白，以及装配导出（字段去向、卡格式、PNG、校验脚本） |
+| cf-card-xiaobaix | 小白X前端 | 小白X（LittleWhiteBox）循环任务（`<<taskjs>>`）、全屏交互终端、状态栏 HUD 正则、`LWB_StateV2` 变量同步、三层场景状态机与本地素材 Base64 打包 |
 | cf-card-oneclick | 一键出卡 | 开头一次确认需要什么和结构提案，然后按 调研 → 世界书 → 角色 → 配套 → 审查 → 装配 自动跑完 |
 | cf-card-project | 卡工程 | 卡工程的位置、分区、认版本，以及接卡、推送、拉回流程；具体命令只在文末「工具对照」里举例 |
 
