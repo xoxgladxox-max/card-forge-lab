@@ -129,7 +129,7 @@
 | `position` | string | `before_char` / `after_char`（其余位置以 extensions.position 数值为准） |
 | `use_regex` | bool | **兼容字段，酒馆前端根本不读**。导出时源码硬写 `true`（注释：ST keys are always regex）。照写 `true` 即可 |
 
-> 🚨 `use_regex` 是纯装饰。`world-info.js` 里搜不到 `use_regex`/`useRegex`——匹配逻辑是 `matchKeys()` 对**每个** key 跑一次 `parseRegexFromString(needle)`：能解析成 `/pattern/flags` 就走正则并**无视其余匹配选项**（大小写、全词），否则按纯文本。所以：想要正则就把 key 写成 `/娜娜|ナナ/i`，不想要就写普通词，**跟这个字段没关系**。合法 flags 只有 `g i m s u y`。
+> 🚨 `use_regex` 是纯装饰。`world-info.js` 里搜不到 `use_regex`/`useRegex`——匹配逻辑是 `matchKeys()` 对**每个** key 跑一次 `parseRegexFromString(needle)`：能解析成 `/pattern/flags` 就走正则并**无视其余匹配选项**（大小写、全词），否则按纯文本。所以：想要正则就把 key 写成 `/角色本名|外文名/i`，不想要就写普通词，**跟这个字段没关系**。合法 flags 只有 `g i m s u y`。
 
 ## 三、extensions 全字段
 
@@ -314,7 +314,7 @@ AND_ANY: 0, NOT_ALL: 1, NOT_ANY: 2, AND_ALL: 3
 |---|---|---|---|---|---|---|---|---|
 | 条数 | 5 | 18 | **47** | **37** | **33** | 10 | 5 | 3 |
 
-> **2~4 个关键词是主流（117/158）**。典型角色条：`["ナナ", "娜娜", "ナナ・アスタ・デビルーク", "1-B", "1年生"]` = 日文名 + 中文译名 + 全名 + 班级 + 年级。
+> **2~4 个关键词是主流（117/158）**。典型角色条：`["外文名", "角色本名", "角色全名", "班级或部门", "身份代称"]` = 外文名 + 中文译名 + 全名 + 所属部门 + 代称。
 
 **content 体量（世界书存在的理由）**
 
