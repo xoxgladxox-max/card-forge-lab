@@ -1,12 +1,12 @@
 ---
 name: cf-card-format-export
-description: v3.10.1｜文风、开场白、回复格式与导出：写文风规则、开场白（含篇章生成器）、每轮回复格式和状态栏，并把内容装配成 SillyTavern 可导入的卡（V2/V3 JSON、PNG、内嵌世界书、校验脚本）。用户说「写开场白」「定文风」「做状态栏」「回复格式」「导出卡」「转成 PNG」「转成 JSON」「文档转卡」「卡导入报错」时使用。
+description: v3.11.0｜文风、开场白、回复格式与导出：写文风规则、开场白（含篇章生成器）、每轮回复格式和状态栏，并把内容装配成 SillyTavern 可导入的卡（V2/V3 JSON、PNG、内嵌世界书、校验脚本）。用户说「写开场白」「定文风」「做状态栏」「回复格式」「导出卡」「转成 PNG」「转成 JSON」「文档转卡」「卡导入报错」时使用。
 metadata:
-  version: 3.10.1
+  version: 3.11.0
   updated: 2026-10-21
 ---
 
-# 配套（v3.10.1）
+# 配套（v3.11.0）
 
 范围：世界和角色以外一张卡还需要的部分：文风、回复格式、开场白、装配导出。各部分独立，按需读对应一节。
 
@@ -396,10 +396,13 @@ dlc_style_rain_harbor:
 
 # 四、装配：内容放进卡的哪里
 
-1. 一节点一条目。
+1. 一节点一条目（节点文件协议）。
    - `world_book/**/<条目>.md` 正文 = 条目 content，元信息头 = 触发配置。
    - `greeting` 放 `message/<n>.md`：`0.md` 为 `first_mes`，`1.md` 起为 `alternate_greetings`。
-   - 单槽字段放顶层 `<字段>.md`（`description.md`、`system_prompt.md` 等，空字段不生成）。`note` 不导出。creator_notes、post_history_instructions、tags、mes_example 默认不写。
+   - 单槽字段放顶层 `<字段>.md`（`description.md`、`personality.md`、`scenario.md`、`mes_example.md`、`system_prompt.md`、`post_history_instructions.md`，空字段不生成）。`note` 不导出。creator_notes、post_history_instructions、tags、mes_example 默认不写。
+   - `.md` 节点文件有且仅有以下两种合法格式（`card-forge-lab/src/lib/nodes.mjs` 与 `protocol.mjs`）：
+     - **格式 A：带 YAML frontmatter 的节点文件（`card.md`、`world_book/**/*.md`，或显式声明设置的字段文件）**。只要文件开头写了 `--- ... ---` YAML 块，**第二个 `---` 下方必须有且仅有一行 `<!-- body -->` 作为正文分界标记**（缺标记报 `[P1]`、多标记报 `[P2]` 阻断构建）。`---` 与 `<!-- body -->` 之间为可选「工序段」（`## 工序`、`- 状态：...`、`- 确认方式：...`，工具只读状态不装入卡正文）；`<!-- body -->` 之后才是装入卡或世界书的正文（即使 `card.md` 没有正文，只要写了 `---` 头，末尾也必须带一行 `<!-- body -->`）。`position` 合法值仅限 `before_char`、`after_char`、`"@D0"` / `"@D1"` / `"@D2"` ...（带 `@` 的值在 YAML 中加双引号）；`type` 合法值仅限 `card`、`world`、`location`、`rule`、`item`、`lore`、`character`、`module`、`corpus`、`style`、`output`、`greeting`、`note`、`plot`、`wiki`、`event`；常驻条目写 `constant: true`，非常驻条目必须写非空数组 `keys: [...]`。
+     - **格式 B：不带 YAML frontmatter 的纯正文文件（仅限上述顶层单槽字段 `.md` 与 `message/<n>.md`）**。不写开头 `---` 块时，**不要写 `<!-- body -->`**，整个文件直接作为该字段正文；一旦在开头加了 `---` 块，就必须按格式 A 加上一行 `<!-- body -->`。
    - 一个节点要出多条条目时（例：配角群每人一条），每人一个 `.md` 放 `world_book/character/`（或 `world_book/`）下；不在导出后另跑脚本拆，否则构建记录的指纹对不上。
    - 进世界书的 character 节点放 `world_book/` 下（或显式写 `target: character_book`）；`description.md` 由 output 节点写本卡元提示词。corpus、output、greeting 写明去处或按规定目录放。
 2. 层级对应注入深度：世界观与社会规律 @D4 → 机制与冲突规则 @D3 → 角色与剧情 @D2 → 文风 @D1 → 输出规范 @D0。深度写在节点元信息头，导出时照搬。
