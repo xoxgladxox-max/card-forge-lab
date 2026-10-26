@@ -7,7 +7,7 @@ import path from 'node:path';
 import YAML from 'yaml';
 import { extractChara } from '../lib/png.mjs';
 import { scanCard, BODY_MARK } from '../lib/nodes.mjs';
-import { assemble } from './build.mjs';
+import { assemble, entryFromNode } from './build.mjs';
 import { fnv1a } from '../lib/fingerprint.mjs';
 import { listExtras, defaultKeep, keptExtensions, extraFiles, extraBase } from '../lib/extras.mjs';
 
@@ -92,7 +92,7 @@ function bodyRoundTrips(text) {
   return !text.includes('\r') && text === text.trim() && !text.includes(BODY_MARK);
 }
 
-function safeDirName(s, used) {
+export function safeDirName(s, used = new Set()) {
   let base = String(s || '未命名').replace(/[\\/:*?"<>|\r\n\t]/g, '_').replace(/[. ]+$/, '').trim().slice(0, 60) || '未命名';
   let name = base;
   for (let i = 2; used.has(name.toLowerCase()); i++) name = `${base}-${i}`;
@@ -100,13 +100,13 @@ function safeDirName(s, used) {
   return name;
 }
 
-function nodeText(fm, body, source) {
+export function nodeText(fm, body, source) {
   const head = YAML.stringify(fm, { lineWidth: 0 }).trimEnd();
   return `---\n${head}\n---\n\n## 工序\n- 来源：${source}\n- 状态：草稿\n\n${BODY_MARK}\n${body}\n`;
 }
 
 // 条目 → frontmatter（只写节点协议已有的字段；其余差异第二遍补进 tavern）
-function entryFrontmatter(e, nodeId) {
+export function entryFrontmatter(e, nodeId) {
   const ext = e.extensions ?? {};
   const fm = { id: nodeId, type: 'lore', target: 'character_book', title: String(e.comment ?? '') };
   if (e.keys?.length) fm.keys = e.keys.map(String);
@@ -120,7 +120,7 @@ function entryFrontmatter(e, nodeId) {
 }
 
 // 原条目与装配结果的差异 → tavern 覆盖段（正文、标题以外）
-function entryOverride(orig, built) {
+export function entryOverride(orig, built) {
   const ov = {};
   const lost = [];
   for (const k of new Set([...Object.keys(orig), ...Object.keys(built)])) {
@@ -136,6 +136,28 @@ function entryOverride(orig, built) {
   }
   if (Object.keys(ext).length) ov.extensions = ext;
   return { ov, lost };
+}
+
+// 单条酒馆世界书条目 → 完整 frontmatter（含 tavern 覆盖段），供实时同步在酒馆新建或修改条目设置时写回 .md
+export function buildEntryFrontmatter(e, nodeId, { existingType = 'lore', displayIndex = -1 } = {}) {
+  const fm = entryFrontmatter(e, nodeId);
+  fm.type = existingType || 'lore';
+  const syn = {
+    id: nodeId,
+    stem: fm.title || nodeId,
+    frontmatter: fm,
+    keys: fm.keys ?? [],
+    secondary: fm.secondary ?? [],
+    position: fm.position ?? 'before_char',
+    order: fm.order,
+    constant: fm.constant === true,
+    recursion: fm.recursion === true,
+    body: String(e.content ?? ''),
+  };
+  const b = entryFromNode(syn, displayIndex, fm.order ?? e.insertion_order ?? 100);
+  const { ov } = entryOverride(e, b);
+  if (Object.keys(ov).length) fm.tavern = ov;
+  return fm;
 }
 
 // 比对用：条目按 id 排序（数组顺序不影响酒馆运行），键名排序

@@ -23,7 +23,7 @@ function positionFields(n) {
   return { top: pos.kind, ext: POSITION_NUM[pos.kind], depth: 4 };
 }
 
-function entryFromNode(n, displayIndex, order) {
+export function entryFromNode(n, displayIndex, order) {
   const pos = positionFields(n);
   return {
     id: fnv1a(n.id),
@@ -87,7 +87,7 @@ function applyOverride(obj, ov) {
   return obj;
 }
 
-function entryWithOverride(n, displayIndex, order) {
+export function entryWithOverride(n, displayIndex, order) {
   return applyOverride(entryFromNode(n, displayIndex, order), n.frontmatter.tavern);
 }
 
