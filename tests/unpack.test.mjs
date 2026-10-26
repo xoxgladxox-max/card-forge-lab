@@ -135,3 +135,19 @@ test('unpack：独立世界书文件拆成只有世界书的节点工程，正�
   assert.equal(byId.get(7).insertion_order, 102);
   assert.deepEqual(byId.get(7).secondary_keys, ['备']);
 });
+
+test('unpack：character_book 为 null 的酒馆新建空卡拆包与装回保持 null', async () => {
+  const dir = await tmpDir();
+  const c = sampleCard();
+  c.data.character_book = null;
+  const json = path.join(dir, 'empty-book.json');
+  await fs.writeFile(json, JSON.stringify(c));
+  const proj = path.join(dir, 'proj');
+  const r = await unpackCmd(json, { out: proj });
+  assert.ok(r.ok, r.report);
+  assert.equal(r.roundTrip?.ok, true);
+  assert.equal(r.roundTrip?.diffCount, 0);
+  const built = assemble(await scanCard(proj)).card;
+  assert.equal(built.data.character_book, null);
+});
+

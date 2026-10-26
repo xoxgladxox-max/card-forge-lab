@@ -266,6 +266,10 @@ export async function unpackCmd(file, opts = {}) {
   if (card.spec_version && card.spec_version !== c1.spec_version) cardOv.spec_version = card.spec_version;
   const dataOv = {};
   for (const k of Object.keys(d)) {
+    if (k === 'character_book' && d.character_book === null && !entries.length) {
+      dataOv.character_book = null;
+      continue;
+    }
     if (BODY_FIELDS.has(k)) continue;
     if (k === 'extensions') {
       // 拆成文件的项不再重复记在 card.md；未知扩展字段（如 depth_prompt）照原样留着
@@ -311,5 +315,15 @@ export async function unpackCmd(file, opts = {}) {
     diffs.slice(0, 30).forEach(p => lines.push(`  ${p}`));
   } else lines.push('往返比对：装配结果与原卡 data 一致（条目按 id 比对；补上的默认键和首尾空白差异见上）');
   lines.push(diffs.length ? 'RESULT : FAIL' : 'RESULT : PASS');
-  return { ok: diffs.length === 0, report: lines.join('\n') };
+  return {
+    ok: diffs.length === 0,
+    report: lines.join('\n'),
+    roundTrip: {
+      ok: diffs.length === 0,
+      diffCount: diffs.length,
+      diffs: diffs.slice(0, 30),
+      addedKeys: [...new Set(added)],
+      whitespaceOnlyCount: wsOnly.length,
+    },
+  };
 }

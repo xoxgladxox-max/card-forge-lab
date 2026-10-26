@@ -34,6 +34,7 @@ export function parseChunks(buf) {
     off = dataEnd + 4;
     if (type === 'IEND') break;
   }
+  if (!chunks.some(c => c.type === 'IEND')) throw new Error('PNG 缺 IEND 块，文件可能损坏');
   return chunks;
 }
 
@@ -71,15 +72,21 @@ function decodeTextChunk(type, data) {
 
 export function extractChara(pngBuf) {
   const chunks = parseChunks(pngBuf);
+  const found = [];
   for (const c of chunks) {
     if (!['tEXt', 'zTXt', 'iTXt'].includes(c.type)) continue;
     const kw = chunkKeyword(c.type, c.data);
     if (kw !== 'chara' && kw !== 'ccv3') continue;
     const text = decodeTextChunk(c.type, c.data);
     const json = Buffer.from(text.trim(), 'base64').toString('utf8');
-    return { keyword: kw, card: JSON.parse(json) };
+    found.push({ keyword: kw, card: JSON.parse(json) });
   }
-  return null;
+  if (!found.length) return null;
+  const chara = found.find(f => f.keyword === 'chara');
+  const ccv3 = found.find(f => f.keyword === 'ccv3');
+  const primary = chara ?? found[0];
+  const consistent = !(chara && ccv3) || JSON.stringify(chara.card?.data ?? chara.card) === JSON.stringify(ccv3.card?.data ?? ccv3.card);
+  return { keyword: primary.keyword, card: primary.card, consistent };
 }
 
 export function embedChara(pngBuf, cardJson) {

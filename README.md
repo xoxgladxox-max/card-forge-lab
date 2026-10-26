@@ -23,7 +23,7 @@
 
 | 工具 | 用途 |
 |---|---|
-| [Node.js](https://nodejs.org/) | 运行命令行工具；`package.json` 声明最低版本为 18，首次安装建议选当前受支持的 LTS 版本 |
+| [Node.js](https://nodejs.org/) | 运行命令行工具；建议使用 Node.js 20+ LTS 版本（与 `tt-card-bridge` 一致） |
 | [Git](https://git-scm.com/) | 下载和更新源码；也可以在 GitHub 使用 **Code → Download ZIP** |
 | 文本编辑器，例如 VS Code | 修改 Markdown、YAML 与节点内容 |
 | PowerShell 5.1+ | 内嵌世界书校验使用；其他平台的适配情况不作保证 |
@@ -88,14 +88,13 @@ node src/cli.mjs inspect examples/meta-template/dist/元提示词模板.json
 
 ### 3. 开始自己的卡
 
-把 `examples/meta-template/` 复制到 `projects/` 下的新目录，再按节点协议修改。例如：
+推荐与 `tt-card-bridge` 共用同一个外部**工作区目录**（一卡一文件夹：`<工作区目录>/<卡名>/`）。也可以把 `examples/meta-template/` 复制到你的工作区目录下新目录，再按节点协议修改：
 
 ```powershell
-New-Item -ItemType Directory -Force projects | Out-Null
-Copy-Item -Recurse examples/meta-template projects/my-first-card
+Copy-Item -Recurse examples/meta-template "<工作区目录>/<卡名>"
 ```
 
-如果 `projects/my-first-card` 已存在，请换一个未使用的目录名，不要重复执行复制来覆盖旧卡。
+如果目标目录已存在，请换一个未使用的目录名，不要重复执行复制来覆盖旧卡。
 
 从新目录的 `card.md` 开始阅读。标准卡工程的分区是 `card.md`（卡根）、`<字段>.md`（如 `description.md`）、`message/<n>.md`（开场白）、`world_book/**/<条目>.md`（世界书）、`regex/`、`scripts/`。节点写法见 [节点协议](docs/spec/node-protocol.md)，字段与命令细节见 [使用说明](docs/usage.md)。
 
@@ -106,8 +105,6 @@ node src/cli.mjs migrate <旧卡目录> --out <新标准卡目录>
 ```
 
 迁移不改旧目录；输出目录须不存在或为空。旧版目录直接跑 `check` / `build` 会报 P10 并拒绝构建。
-
-`projects/` 默认被 Git 忽略，私人卡不会因为普通的 Git 暂存操作而自动进入这个工具仓库。不要使用强制添加去绕过忽略规则。
 
 ## 常用命令
 
@@ -134,7 +131,6 @@ node src/cli.mjs migrate <旧卡目录> --out <新标准卡目录>
 |---|---|---|
 | `README.md` | 项目首页与入门步骤 | 先看这里 |
 | `examples/meta-template/` | 可复制的中立节点模板 | 开第一张卡时 |
-| `projects/` | 本地私人卡项目，不随仓库分发 | 制卡时 |
 | `skills/` | 给 AI 使用的制卡方法与规则 | 配置 AI 工作流时 |
 | `src/` | CLI 与库源码 | 修改工具时 |
 | `scripts/` | 辅助脚本 | 按相应文档需要使用 |

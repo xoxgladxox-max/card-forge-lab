@@ -16,15 +16,34 @@ function statusCell(n) {
   return `${s}（${n.nodeConfirm.split(/[（(]/)[0].trim()}）`;
 }
 
+async function countDirFiles(dir) {
+  let entries;
+  try { entries = await fs.readdir(dir, { withFileTypes: true }); }
+  catch { return 0; }
+  let total = 0;
+  for (const e of entries) {
+    if (e.name.startsWith('.')) continue;
+    const full = path.join(dir, e.name);
+    if (e.isDirectory()) total += await countDirFiles(full);
+    else if (e.isFile()) total += 1;
+  }
+  return total;
+}
+
 export async function statusCmd(rootDir, opts = {}) {
   const scan = await scanCard(rootDir);
   const { errors, warnings } = validateNodes(scan);
   const records = await loadCheckRecords(scan.rootDir);
+  const candidateCount = await countDirFiles(path.join(scan.rootDir, '候选'));
+  const pendingCount = await countDirFiles(path.join(scan.rootDir, '待归位'));
 
   const lines = [];
   const card = scan.nodes.find(n => n.type === 'card');
   lines.push(`项目：${card?.frontmatter?.name ?? path.basename(scan.rootDir)}`);
   lines.push(`节点：${scan.nodes.length} 个`);
+  if (candidateCount > 0 || pendingCount > 0) {
+    lines.push(`待处理：候选 ${candidateCount} 项，待归位 ${pendingCount} 项`);
+  }
   lines.push('');
   const tableStart = lines.length;
   lines.push('| 节点 | 类型 | 状态 | 导出 | 检查 |');

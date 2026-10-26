@@ -204,6 +204,29 @@ export function validateNodes(scan) {
     }
   }
 
+  // P23 世界书条目 tavern.id（uid）不能重复（重复时酒馆 convertCharacterBook 会后者覆盖前者）
+  {
+    const seenUid = new Map();
+    for (const n of book) {
+      const uid = n.frontmatter?.tavern?.id;
+      if (uid === undefined || uid === null || uid === '') continue;
+      const key = String(uid);
+      if (seenUid.has(key)) {
+        push(errors, n, 'P23', `tavern.id（世界书 uid）${JSON.stringify(uid)} 与 ${seenUid.get(key).relPath} 重复：酒馆导入时会互相覆盖`);
+      } else {
+        seenUid.set(key, n);
+      }
+    }
+  }
+
+  // P24 UTF-8 乱码替换符 U+FFFD 检查
+  for (const n of scan.nodes) {
+    const fmStr = JSON.stringify(n.frontmatter ?? {});
+    if ((n.body && n.body.includes('\uFFFD')) || fmStr.includes('\uFFFD')) {
+      push(errors, n, 'P24', '包含乱码替换符 U+FFFD，文件编码可能损坏');
+    }
+  }
+
   // P21 编号保留不用：world_book/ 下可以建子文件夹分组，装配不看目录，不再报嵌套
 
   // P10 卡根数量与旧版节点树拦截（缺失 card.md 或仍为未迁移的旧版节点树时必须报 error 阻断构建）

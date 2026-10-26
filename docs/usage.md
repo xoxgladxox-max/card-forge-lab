@@ -7,7 +7,7 @@
 | 位置 | 作用 |
 |---|---|
 | `skills/` | 制卡技能原件，清单见 `skills/README.md` |
-| `projects/` | 本地卡工程（不进 git） |
+| `<工作区目录>/<卡名>/` | 本地标准卡工程（与 `tt-card-bridge` 共用同一个外部工作区目录） |
 | `src/` | 命令行工具：校验、用词检查、装配成卡、拆卡、迁移 |
 | `examples/meta-template/` | 可复制的空白卡工程模板 |
 
@@ -20,7 +20,7 @@
 
 ## 环境要求
 
-- Node.js ≥ 22
+- Node.js ≥ 20
 - PowerShell 5.1+（世界书和角色卡校验脚本需要）
 - 主要在 Windows 上使用；其他平台未作保证
 
@@ -92,6 +92,7 @@ target: description    # 可选；world 等类型默认进世界书
 - 一个节点只出一个条目。要出多条（例：配角群里每人一条），建父节点加每人一个子节点，不要导出后另跑脚本拆，否则构建记录里的指纹对不上。
 - 世界书条目放在 `world_book/` 下，一条一个 `.md`；子目录只用于分组（如 `world_book/character/小满口癖语料.md`）。旧版 `world/节点名/index.md` 写法不被读取，先用 `migrate` 迁移；直接对旧版目录跑 check / build 会报 P10 error。
 - 同一个关键词挂在多个节点 → P22 警告：一喊全响，常用词改更具体的专名。
+- 世界书条目的 `tavern.id`（酒馆 `uid`）：已有条目保持原 `tavern.id` 不重排；`build` 时会为未写 `tavern.id` 的新增条目从当前最大号 + 1 分配连续小整数并写回 `.md`。同一张卡内 `tavern.id` 重复 → P23 报错；节点包含乱码替换符 `U+FFFD` → P24 报错。
 - `note/`、`state.md` 不导出。
 
 ## 断点续接

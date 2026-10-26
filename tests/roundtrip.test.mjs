@@ -197,3 +197,37 @@ test('备份：连续两次 build 各自保留，不互相覆盖', async () => {
     assert.ok(files.length >= 2, `备份 ${d} 应含 json+txt`);
   }
 });
+
+test('P1.2/P1.4/P1.5：build 为无 tavern.id 条目分配递增 uid 写回；P23 拦截重复 uid；P24 拦截 U+FFFD；status 显示候选/待归位', async () => {
+  const tmp = await copyProject(EXAMPLE);
+  const wb2 = path.join(tmp, 'world_book', '第二条.md');
+  await fs.writeFile(wb2, `---\ntype: lore\nid: wb-second\ntitle: 第二条\nkeys: [测试词]\nposition: "@D2"\n---\n\n## 工序\n- 状态：已确认\n\n<!-- body -->\n<lore name="第二条">\nkey: val\n</lore>\n`, 'utf8');
+  const r = await buildCmd(tmp);
+  assert.ok(r.ok, r.report);
+  const scanAfter = await scanCard(tmp);
+  const uids = scanAfter.nodes.filter(n => n.relPath.startsWith('world_book')).map(n => n.frontmatter?.tavern?.id);
+  assert.deepEqual(uids.sort((a, b) => a - b), [0, 1]);
+
+  // 制造重复 tavern.id → P23 error
+  const wb1 = path.join(tmp, 'world_book', '世界设定.md');
+  const scan1 = await scanCard(tmp);
+  const uid1 = scan1.nodes.find(n => n.relPath.endsWith('世界设定.md')).frontmatter.tavern.id;
+  const raw2 = await fs.readFile(wb2, 'utf8');
+  await fs.writeFile(wb2, raw2.replace(/(\btavern:\r?\n\s+id:\s*)\d+/, `$1${uid1}`), 'utf8');
+  const cDup = await checkCmd(tmp);
+  assert.equal(cDup.ok, false);
+  assert.match(cDup.report, /P23/);
+
+  // 恢复 uid 并写入 U+FFFD → P24 error
+  await fs.writeFile(wb2, raw2.replace('key: val', 'key: \uFFFD'), 'utf8');
+  const cBadUtf = await checkCmd(tmp);
+  assert.equal(cBadUtf.ok, false);
+  assert.match(cBadUtf.report, /P24/);
+
+  // 恢复正常并在 候选/ 与 待归位/ 放入文件 → status 显示统计
+  await fs.writeFile(wb2, raw2, 'utf8');
+  await fs.mkdir(path.join(tmp, '候选'), { recursive: true });
+  await fs.writeFile(path.join(tmp, '候选', 'a.md'), 'x', 'utf8');
+  const st = await statusCmd(tmp);
+  assert.match(st, /待处理：候选 1 项，待归位 0 项/);
+});

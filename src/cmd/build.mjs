@@ -4,7 +4,8 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { scanCard, parsePosition, defaultTarget, assignOrders } from '../lib/nodes.mjs';
+import YAML from 'yaml';
+import { scanCard, parsePosition, defaultTarget, assignOrders, bookNodesOf, quoteBarePosition } from '../lib/nodes.mjs';
 import { validateNodes, formatReport } from '../lib/protocol.mjs';
 import { sha256Hex, fnv1a } from '../lib/fingerprint.mjs';
 import { embedChara } from '../lib/png.mjs';
@@ -133,6 +134,8 @@ export function assemble(scan, opts = {}) {
       entries: bookSorted.map((n, i) => entryWithOverride(n, i, orders.get(n))),
     };
     applyOverride(data.character_book, card?.frontmatter?.tavern?.book);
+  } else if (card?.frontmatter?.tavern?.data && Object.hasOwn(card.frontmatter.tavern.data, 'character_book') && card.frontmatter.tavern.data.character_book === null) {
+    data.character_book = null;
   }
   applyOverride(data, card?.frontmatter?.tavern?.data);
   // regex/、scripts/ 里的拆分文件合回 extensions（card.md 里留着的项按原顺序补位）
@@ -177,6 +180,48 @@ async function backupIfExists(file, backupRef) {
   return dest;
 }
 
+async function assignMissingBookTavernIds(scan) {
+  const book = bookNodesOf(scan);
+  if (!book.length) return [];
+  const { sorted } = assignOrders(book);
+  const usedUids = new Set();
+  let maxUid = -1;
+  for (const n of sorted) {
+    const uid = n.frontmatter?.tavern?.id;
+    if (uid !== undefined && uid !== null && uid !== '') {
+      usedUids.add(String(uid));
+      const num = Number(uid);
+      if (Number.isInteger(num) && num > maxUid) maxUid = num;
+    }
+  }
+  const assigned = [];
+  for (const n of sorted) {
+    if (n.loose) continue;
+    const cur = n.frontmatter?.tavern?.id;
+    if (cur !== undefined && cur !== null && cur !== '') continue;
+    let nextUid = maxUid + 1;
+    while (usedUids.has(String(nextUid))) nextUid++;
+    maxUid = nextUid;
+    usedUids.add(String(nextUid));
+    n.frontmatter.tavern = { ...(n.frontmatter.tavern ?? {}), id: nextUid };
+    const abs = path.join(scan.rootDir, n.relPath);
+    const raw = await fs.readFile(abs, 'utf8');
+    const hasBom = raw.charCodeAt(0) === 0xfeff;
+    const clean = hasBom ? raw.slice(1) : raw;
+    const fmMatch = clean.match(/^---\r?\n([\s\S]*?)\r?\n---(\r?\n?)/);
+    if (fmMatch) {
+      const eol = fmMatch[0].includes('\r\n') ? '\r\n' : '\n';
+      const parsedFm = YAML.parse(quoteBarePosition(fmMatch[1])) ?? {};
+      parsedFm.tavern = { ...(parsedFm.tavern ?? {}), id: nextUid };
+      const newFmText = YAML.stringify(parsedFm, { lineWidth: 0 }).trimEnd().replace(/\r?\n/g, eol);
+      const updated = (hasBom ? '\uFEFF' : '') + `---${eol}${newFmText}${eol}---${fmMatch[2]}` + clean.slice(fmMatch[0].length);
+      await fs.writeFile(abs, updated, 'utf8');
+      assigned.push({ relPath: n.relPath, uid: nextUid });
+    }
+  }
+  return assigned;
+}
+
 export async function buildCmd(rootDir, opts = {}) {
   const scan = await scanCard(rootDir);
   const { errors, warnings } = validateNodes(scan);
@@ -184,6 +229,7 @@ export async function buildCmd(rootDir, opts = {}) {
     return { ok: false, report: `构建拒绝：协议存在 ${errors.length} 处问题\n` + formatReport({ errors, warnings }) };
   }
 
+  await assignMissingBookTavernIds(scan);
   const { card, bookCount, usedNodes } = assemble(scan, opts);
   const distDir = path.join(scan.rootDir, 'dist');
   const backupsDir = path.join(scan.rootDir, 'backups');
