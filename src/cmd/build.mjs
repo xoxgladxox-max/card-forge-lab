@@ -128,9 +128,24 @@ export function assemble(scan, opts = {}) {
     character_version: String(card?.frontmatter?.version ?? '1.0'),
     extensions: {},
   };
+  // 支持 card.md 写在 frontmatter 顶层或 <!-- body --> YAML 里的扩展与世界书名（world / world_book_name / extensions.world / tavern.data.extensions.world）
+  let bodyMeta = null;
+  if (card?.body?.trim()) {
+    try {
+      const parsed = YAML.parse(card.body);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) bodyMeta = parsed;
+    } catch { /* body 不是 YAML 时忽略 */ }
+  }
+  const cfm = { ...(bodyMeta ?? {}), ...(card?.frontmatter ?? {}) };
+  if (cfm.character_version !== undefined && card?.frontmatter?.version === undefined) data.character_version = String(cfm.character_version);
+  if (cfm.extensions && typeof cfm.extensions === 'object' && !Array.isArray(cfm.extensions)) {
+    data.extensions = { ...data.extensions, ...structuredClone(cfm.extensions) };
+  }
+  const explicitWorld = cfm.tavern?.data?.extensions?.world ?? cfm.extensions?.world ?? cfm.world ?? cfm.world_book_name ?? cfm.tavern?.book?.name;
+  const bookName = (typeof explicitWorld === 'string' && explicitWorld.trim()) ? explicitWorld.trim() : name;
   if (bookNodes.length) {
     data.character_book = {
-      name: `${name}`,
+      name: bookName,
       entries: bookSorted.map((n, i) => entryWithOverride(n, i, orders.get(n))),
     };
     applyOverride(data.character_book, card?.frontmatter?.tavern?.book);
@@ -138,6 +153,9 @@ export function assemble(scan, opts = {}) {
     data.character_book = null;
   }
   applyOverride(data, card?.frontmatter?.tavern?.data);
+  if (explicitWorld !== undefined) {
+    data.extensions.world = typeof explicitWorld === 'string' ? explicitWorld.trim() : '';
+  }
   // regex/、scripts/ 里的拆分文件合回 extensions（card.md 里留着的项按原顺序补位）
   applyExtras(data, scan.extras);
 
