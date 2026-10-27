@@ -1,12 +1,12 @@
 ---
 name: cf-card-xiaobaix
-description: v1.1.0｜小白X（LittleWhiteBox）角色卡前端与循环任务构建：纯小白X架构（零酒馆助手依赖）、<<taskjs>> 循环任务挂载、LWB_StateV2 与 variables.local 状态同步、楼层胶囊条与隐藏状态容器、终端内剧情正文阅读框、无图期 CG 折叠槽、桌面双栏与手机四 Tab 自适应、游戏化展示与叙事行动分层、前端随机与保底、三层场景状态机、属性阈值解锁，以及本地美术素材 Base64 打包与独立 HTML 预览。用户说「做小白X前端」「写 taskjs」「小白X任务」「做交互终端」「养成前端」「状态栏 HUD」「打包前端素材」时使用。
+description: v1.2.0｜小白X（LittleWhiteBox）角色卡前端与循环任务构建：纯小白X架构（零酒馆助手依赖）、<<taskjs>> 循环任务挂载、LWB_StateV2 与 variables.local 状态同步、楼层胶囊条与隐藏状态容器、终端内剧情正文阅读框、无图期 CG 折叠槽、桌面双栏与手机四 Tab 自适应、游戏化展示与叙事行动分层、前端随机与保底、三层场景状态机、属性阈值解锁，以及本地美术素材 Base64 打包与独立 HTML 预览。用户说「做小白X前端」「写 taskjs」「小白X任务」「做交互终端」「养成前端」「状态栏 HUD」「打包前端素材」时使用。
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   updated: 2026-10-21
 ---
 
-# 小白X角色卡前端与任务构建（v1.1.0）
+# 小白X角色卡前端与任务构建（v1.2.0）
 
 范围：角色卡内嵌的小白X（LittleWhiteBox）循环任务（`xiaobaix-tasks`）、全屏交互终端、楼层状态栏 HUD 正则、状态变量读写（`LWB_StateV2` 与 `variables.local`）、场景与属性养成状态机，以及本地美术素材的分离打包与独立预览。
 
@@ -19,16 +19,20 @@ metadata:
 
 # 一、卡工程槽位与小白X数据结构
 
-在角色卡工程目录中，小白X前端由 `regex/` 与 `scripts/xiaobaix-tasks.json` 两个槽位组成：
+在角色卡工程目录中，小白X前端由 `regex/` 与 `scripts/xiaobaix-tasks.json` 两个槽位组成；源码、素材和预览放在 `前端源码/`，不进卡：
 
 ```
 D:\cards\<卡名>\
 ├── regex/
 │   ├── 01-状态栏HUD.json         # 楼层内 <status> 美化正则配置
 │   └── 01-状态栏HUD.html         # replaceString：一行胶囊条 + 隐藏状态容器
-└── scripts/
-    └── xiaobaix-tasks.json       # 小白X循环任务（构建时自动写入 data.extensions['xiaobaix-tasks']）
+├── scripts/
+│   └── xiaobaix-tasks.json       # 小白X循环任务（构建时自动写入 data.extensions['xiaobaix-tasks']）
+└── 前端源码/                     # terminal.src.js、assets/、preview.html；装卡和同步都不读这里
 ```
+
+- 装卡和同步只读 `regex/`、`scripts/` 下一层的 `.json`/`.html`/`.js`。源码、图片、`preview.html` 不要放进这两个目录，也不要放在 `world_book/`、`message/` 里。
+- 同一作品要在酒馆里同时保留文字版和前端版时，做成两个并排的卡工程：只有前端版带 `regex/`、`scripts/`、`前端源码/`；两张卡的世界书名分开，避免推送一张覆盖另一张在用的世界书。
 
 ## 1. `scripts/xiaobaix-tasks.json` 规范结构
 
@@ -408,21 +412,21 @@ assets/
 
 ## 2. 从模板定制并执行一键打包
 
-1. 复制本技能的 `references/terminal-template.src.js` 到工作目录（如 `terminal.src.js`），按当前角色卡的实际设定修改顶部的 `CARD_CONFIG`（标题、楼层 class 名、正文高亮规则、CG 槽高度、状态字段映射、主舞台热点、外部场景列表、日常与突破行动表、里程碑徽章表）。
+1. 复制本技能的 `references/terminal-template.src.js` 到卡工程的 `前端源码/terminal.src.js`，素材放 `前端源码/assets/`，按当前角色卡的实际设定修改顶部的 `CARD_CONFIG`（标题、楼层 class 名、正文高亮规则、CG 槽高度、状态字段映射、主舞台热点、外部场景列表、日常与突破行动表、里程碑徽章表）。
 2. 只改 `.src.js` 这一份源码。打包脚本只做 `__ASSETS__` 词法替换，不剥离注释、不压缩。不要在 Node 或 Python 脚本里用模板字符串拼接前端 JS，也不要对整段 JS 做按行 `#` 或 `//` 的注释剥离，这类处理会误伤颜色值 `#ff4d8d`、URL 和正则字面量。
 3. 运行本技能自带的打包脚本：
 
 ```bash
 node "<本技能目录>/scripts/pack-xiaobaix.mjs" \
-  --src "./terminal.src.js" \
-  --assets "./assets" \
+  --src "D:/cards/<卡名>/前端源码/terminal.src.js" \
+  --assets "D:/cards/<卡名>/前端源码/assets" \
   --card "D:/cards/<卡名>" \
   --name "[角色名] 交互终端"
 ```
 
 脚本一次运行自动产出三项结果：
 
-1. 将 `./assets` 下所有图片转为 `data:image/...;base64,...` 字典注入 `__ASSETS__`（若传入 `--fallback-assets ./old-assets.json` 则自动补齐未替换的旧图）；
+1. 将 `前端源码/assets` 下所有图片转为 `data:image/...;base64,...` 字典注入 `__ASSETS__`（若传入 `--fallback-assets ./old-assets.json` 则自动补齐未替换的旧图）；
 2. 生成标准双兼容结构的 `D:/cards/<卡名>/scripts/xiaobaix-tasks.json`（含 `chat_changed` 挂载任务与 `after_ai` 自动同步任务）；
 3. 在源码同目录生成可双击离线运行的 `preview.html`（内含模拟 AI 楼层、胶囊条与隐藏状态容器），支持 URL 参数：
    - `preview.html`：默认初始状态（主舞台·昼，自由外出 `1/1`，未达标项带锁）；
