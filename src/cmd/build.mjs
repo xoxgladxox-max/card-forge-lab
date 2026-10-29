@@ -296,11 +296,14 @@ export async function buildCmd(rootDir, opts = {}) {
   if (bookCount > 0) {
     // fileURLToPath 解码中文等非 ASCII 路径；URL.pathname 会留下 %E5… 编码，PowerShell 找不到文件
     const validator = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'skills', 'cf-card-format-export', 'scripts', 'validate-worldbook.ps1');
-    try {
-      const out = execFileSync('powershell', ['-NoProfile', '-File', validator, '-Path', jsonPath], { encoding: 'utf8', timeout: 60000 });
-      worldbookCheck = out.includes('RESULT : PASS') ? 'PASS' : 'FAIL\n' + out;
-    } catch (e) {
-      worldbookCheck = 'FAIL\n' + (e.stdout ?? e.message);
+    const hasValidator = await fs.access(validator).then(() => true, () => false);
+    if (hasValidator) {
+      try {
+        const out = execFileSync('powershell', ['-NoProfile', '-File', validator, '-Path', jsonPath], { encoding: 'utf8', timeout: 60000 });
+        worldbookCheck = out.includes('RESULT : PASS') ? 'PASS' : 'FAIL\n' + out;
+      } catch (e) {
+        worldbookCheck = 'FAIL\n' + (e.stdout ?? e.message);
+      }
     }
   }
 
