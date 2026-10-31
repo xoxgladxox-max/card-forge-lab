@@ -1,12 +1,12 @@
 ---
 name: cf-card-oneclick
-description: v2.7.1｜一键出卡：开头一次问清这张卡要什么，并提出这张卡的结构提案，确认后按 调研 → 世界书 → 角色 → 配套 → 审查 → 装配 自动跑完，中途不再询问；缺料和推断标记后继续，交付时统一列出。用户说「做一张卡」「一键出卡」「从头做整张卡」「整理已有卡」时使用。
+description: v2.8.0｜一键出卡：开头一次问清这张卡要什么，并提出这张卡的结构提案，确认后按 调研 → 世界书 → 角色 → 配套 → 审查 → 装配 自动跑完，中途不再询问；缺料和推断标记后继续，交付时统一列出。用户说「做一张卡」「一键出卡」「从头做整张卡」「整理已有卡」时使用。
 metadata:
-  version: 2.7.1
+  version: 2.8.0
   updated: 2026-10-21
 ---
 
-# 一键出卡（v2.7.1）
+# 一键出卡（v2.8.0）
 
 范围：从提问到交付的整张卡流程。各阶段的写法读对应领域技能，本技能只管顺序、标记、停止条件和交付。
 
@@ -40,9 +40,9 @@ metadata:
 
 | 阶段 | 读哪个技能 | 产出 | 本流程里的处理 |
 |---|---|---|---|
-| 1 调研 | cf-card-research | 来源记录、事实矩阵、缺口清单 | 至少两源交叉；查不到的写进缺口，不凭印象补 |
-| 2 世界书 | cf-card-worldbook | world / location / rule / item / lore 节点与触发配置 | 按题材来源定层数；先定完上位世界总纲与下位条目的拆分，确认后再进角色阶段 |
-| 3 角色 | cf-card-character | character / module / corpus 节点 | 按直通式走，关口只报告不停顿，并入交付报告 |
+| 1 调研 | cf-card-research | `记录/调研/{00-索引, world-*, rules-*, char-<角色>}.md` | 至少两源交叉；按世界观、规则、单角色分文件归档，供后续阶段按需单读 |
+| 2 世界书 | cf-card-worldbook | world / location / rule / item / lore 节点与触发配置 | 只读 `world-*` 与 `rules-*` 分包；先定完上位世界总纲与下位条目的拆分，确认后再进角色阶段 |
+| 3 角色 | cf-card-character | character / module / corpus 节点 | 写某个角色时只读世界总纲与该角色的 `char-<角色>.md`；关口并入交付报告 |
 | 4 配套 | cf-card-format-export；需要小白X前端时加读 cf-card-xiaobaix | style / output / greeting 节点，以及可选的 regex / xiaobaix-tasks.json | 只做出卡单勾选的部分；有状态栏时先定状态栏再写开场白与前端同步 |
 | 5 审查 | cf-card-review；表达问题按 cf-card-refine 改 | 审查报告 | 表达问题就地修；事实、归属、上游层的问题不改，记入交付报告 |
 | 6 装配 | cf-card-format-export 第四、五部分 | 卡文件、世界书、校验结果 | 原卡先备份再写；跑两个校验脚本并回读 |
