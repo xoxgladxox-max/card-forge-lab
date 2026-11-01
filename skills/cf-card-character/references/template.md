@@ -9,7 +9,9 @@
 
 ## 使用边界
 
-- **模板不是填空题。** 只提醒有哪些方向可考虑；作者只想给范围就停在上位概念，说不清细节可写参照锚点（`傲娇：像某作品某知名角色那样`），不替作者补细节。
+- **固定锚点写实，随境互动给开放方向**：
+  - **写清楚的（固定锚点与惯性习惯）**：身份背景、静态外貌与感官常量（`appearance` / `sensory_details`）、说话方式与口癖标点（`speaking_style`）、底层人格逻辑（`personality`）、客观经历（`key_facts`）、关系底线。
+  - **给开放方向的（随境变化与临时反应）**：穿衣搭配（`clothing`）、日常与约会活动（`daily_life`）、情绪与动作变化、试探与奖惩手段、越界与冲突反应、专属互动机制（`about_xxx`）与亲密细节（`dlc_intimacy`）。先写一句大方向或原则，再用 **「平时/通常……」「有时……」「一些情况下……还有一些情况下……例如……」「在特殊情况下……」** 给出两三个具体例子，让模型顺着人物性格往外推。
 - 这是字段形状和三档起始骨架，不是事实清单、证据清单或补全许可。进入模板前先过上游规划与素材准入；缺料时按四状态标【缺口】并回到查料，不用模板把内容填得像完整答案。
 - 每个字段只按自己的职责检查：`traits` 写稳定性格及有据表现；外貌写可观察形态；关系写对象特定的互动；语料写可核对的原句和口调；`roleplay_tips` 写扮演指令；亲密模块写自己的条件与素材。不要把一个字段的禁令推广成全卡规则。
 - `[mini]`、`[std]`、`[full]` 只决定骨架起始范围，不决定资料真假，也不因档位强行增加设定。每个字段只有四种状态：**有料**（正常写）／**原作没有答案**（写明此句）／**缺口**（标【缺口】并列入查料清单）／**作者已删**（只有作者能删字段或块）。Agent 不把旧稿或推断当事实，也不自行删字段；缺料时保留骨架并标【缺口】，不留空值，不写「未知」。
@@ -123,15 +125,12 @@ character:
     touch:                  # 皮肤触感/手指温度/衣料质感
 
   clothing:                 # [std]
-    # 按角色实际衣着立字段，不预设内外层级。
-    style_impression:       # 穿着风格给人的第一印象
-    category:               # 喜好的大类（如：名门女校制服、oversize 私服）
-    # 以下按角色实际常服/特殊场景自拟字段
-    uniform:
-    casual:
-    underwear:              # 衣着事实，有资料才写；不写穿着它时的心理
-    shoes:
-    accessories:            # 耳钉/项链/手表等，数量与位置写死，别处引用时不得改数
+    # 写穿衣风格大方向、各场合偏好与常见单品示例，保留换装弹性：
+    # 用「平时在学校/工作时…；约会或私下偏好…（例如…）；有时会在外套下/细节处…；在特殊场合下（如…）也会…」
+    style_impression:       # 穿着风格给人的整体印象与不同对象面前的反差
+    daily_and_school:       # 校园/职场常态穿搭与常见单品
+    dating_and_private:     # 约会/私下穿搭方向（例如…；有时…；在特殊场合下…）
+    underwear_and_details:  # 内衣偏好与随身配饰（固定信物写准，其余给风格方向与示例）
 
   # -- 4 语言块 (speaking_style) --
   # 台词库是心脏。每条台词同时锚定语感、性格、身份。
@@ -198,106 +197,80 @@ character:
   # -- 6 角色表现与决策层 --
   # 独立表现维度，不是 traits 的重复，也不是必须全部填写。
   # 注：角色的多阶段演进（内在心理、外在表现、语言转变、本阶段不会做的事）不放卡本体，每个阶段单独建一条世界书条件绿灯（见下方「角色阶段条目怎么写」）。
-  behavioral_style:         # 可观察的动作习惯、姿态、节奏与场合差异
-    core_movements:
-    specific_movements:
-    under_pressure:
-    with_user:
-  behavior_logic:            # 稳定原则与应对方向；写倾向和变化余地，不写固定触发流程
-    daily:
-      principle:
-      range:
-    interaction:
-      principle:
-      range:
-    pressure:
-      principle:
-      range:
-  decision_making_style:     # 选择时的原则、取舍顺序与少量高价值例子
+  behavioral_style:         # 习惯动作、姿态、节奏与距离；随场合变化的表现用「平时…有时…例如…」写
+    habitual_movements:     # 属于肌肉记忆的标志性习惯动作
+    situational_variations: # 随心情、对象或独处/公开场合的变化（有时…；一些时候…；在特殊情况下…）
+  behavior_logic:           # 日常、互动与压力下的处事原则与变通余地
+    daily:                  # 平时怎么处理日常事务，有时怎么偷懒或变通
+    interaction:            # 互动里的主动/被动倾向，一些情况下如何试探、拉近或拉开距离
+    under_pressure:         # 遇到压力、质疑或突发状况时的反应方向与例外
+  decision_making_style:    # 做选择时的取舍原则，配一两个典型情境下的思考方向
     principle:
-    characteristics:
-      efficiency:
-      intuition:
-      independence:
-      flexibility:
     examples:
-      - situation:
-        process:
-  emotional_expression:      # 情绪如何外显；写总体方向与可观察信号，不列满固定情绪表
+      -
+  emotional_expression:     # 情绪如何外显；写总体方向、可观察信号，以及在熟人/外人面前的变化
     principle:
     observable_signals:
     variations:
 
   # -- 7 能力与冲突 (abilities) --
-  # 身体条件、技能、特长带来的「能做到什么」，以及冲突／暴力场面里的行动方式。
-  # 服务于角色辨识点（例如腿长就写腿能做到的事），不写战力数值；没有此类戏份时是否删块由作者定（四状态约定）。
-  # 性方面的技巧不放这里，进 dlc_intimacy。
+  # 身体条件、技能、特长带来的「能做到什么」，以及冲突或对方越界时的反应方向。
+  # 服务于角色辨识点（例如腿长就写腿能做到的事）；没有此类戏份时是否删块由作者定（四状态约定）。
   abilities:                # [std 可选]
     - name:
       how_it_shows:         # 日常里怎么看得出来
       limits:               # 做不到／会失手的地方
-  conflict_behavior:        # [std 可选] 冲突升级时的方向：先动嘴还是先动手、退让点、下手轻重范围
+  conflict_behavior:        # [std 可选] 冲突升级或对方越界时的反应原则与开放示例（一些时候…还有一些时候…例如…；在特殊情况下…）
     principle:
-    range:
+    open_examples:
 
   # -- 8 素材块 (persona) --
-  # 纯列表，不含指令动词。角色没有的子项直接删；不知道的内容不填。
-  persona:                   # [std]
-    preferences:             # 喜好、厌恶、习惯和兴趣
+  # 角色没有的子项直接删；不知道的内容不填。
+  persona:                  # [std]
+    preferences:            # 喜好、厌恶、习惯和兴趣（可停在上位范围，或用「例如…」给代表项）
       likes:
       dislikes:
       hobbies:
-    character_weaknesses:     # 已确认的限制、短板与容易失手之处
+    character_weaknesses:   # 已确认的限制、短板与容易失手之处
       -
-    daily_life:               # 日常生活节奏和反复出现的生活事实
-      morning:
-      daytime:
-      evening:
-      night:
-    goals:                    # 驱动目标
+    daily_life:             # 日常作息节奏与常见活动（用「平时…有时…周末或特殊情况下…例如…」写，不锁死每小时固定行程）
+    goals:                  # 驱动目标
       short_term:
       long_term:
-    key_facts:                # 关键经历，客观事实（只写发生了什么）
+    key_facts:              # 关键经历，客观事实（只写发生了什么）
       -
-    background:               # 出身背景与家庭环境
-    residence:                # 居住场所与私密空间细节
+    background:             # 出身背景与家庭环境
+    residence:              # 居住场所与私密空间细节
 
   # -- [可选同级插入] 角色专属机制模块 (about_xxx) --
-  # 当角色存在普通字段装不下的独有核心机制（特殊体质/刻印/契约/独特心理运作回路）且经确认后，在此同级插入（此时形成 12+1 结构）。
-  # 子键名用平实短语，值写清「来源/前因 → 触发与运作条件 → 行为选择方向 → 转换或失效边界」。
-  # 已放进 about_xxx 的机制，不在 overview、acquired、persona.key_facts 中重复解释。
+  # 当角色存在普通字段装不下的独有核心机制（特殊体质/契约/独特的互动或掌控回路）且经确认后，在此同级插入（形成 12+1 结构）。
+  # 写法：先定平时定位与底线，再用「有时…一些情况下…还有一些情况下…例如…在特殊情况下…」写出试探、奖惩、越界反应或状态变化，留足现场发挥空间。
 
   # -- 9 性信息 (sexual_information) --
-  # 只放事实与倾向：经验、身体、情动时看得见的反应、性癖标签与好恶。不放动作流程，不放台词。
-  # 标签体系参考 era-traits.md「五、性癖」与「四、身体」。词汇直白通俗，不用文学遮羞布。
-  # 无 R18 需求时是否整块删由作者定（四状态约定）。日常场景不会读到这里的内容，卡本体其他块不引用它。
+  # 放身体事实与好恶倾向：经验、敏感带、情动时看得见的生理反应、性癖标签与好恶分级。
+  # 标签体系参考 era-traits.md「五、性癖」与「四、身体」。词汇直白通俗。
   sexual_information:       # [std 可选]
     experience:             # 经验与自我认知定位，一两句事实
     body:                   # 敏感带、体质、体型与敏感度；有资料才写
     arousal_signs:          # 情动时可观察的生理信号：耳、唇、声音、呼吸、姿势的变化
     kink_tags:              # 标签 + 好恶分级（喜欢／可以／不要），每条一行
       -
-    boundaries:             # 明确不做的事，有资料才写
+    boundaries:             # 底线与边界，有资料才写
 
   # -- 10 官能特化 (dlc_intimacy) --
-  # 写法见 nsfw.md。开头必写 usage_condition：什么场景下读、其余时候完全静默、一个词不往日常漏。
-  # 按动作拆块，每块是一个能演的动作，块里直接给台词。下面的块名只是形状，块名跟着角色走：她不是主导方就换别的块。
+  # 写法见 nsfw.md。开头必写 usage_condition：什么场景下读、其余时候完全静默。
   # 口调、句式、节奏、称呼与 speech_pattern 保持同一套，变的只有内容；她独有的东西（道具、身体特征、习惯）要进来。
-  # kinks 每条必须是动作，不是名词。没有资料的块不硬写，记进补录清单。
+  # 内部子键跟着角色走，把固定口调/底线与开放的互动手法（「平时…有时…一些时候…例如…在特殊情况下…」）结合起来写：
   dlc_intimacy:             # [std 可选]
     usage_condition:        # 使用条件与静默规则
-    Dominance_Submission:   # 位置 + 风格 + dynamic_balance（主导权在什么情况下倒过来，必写）
-    before_touching:        # 开始之前她做什么
-    telling_him_what_he_does:  # 她怎么描述对方
-    praise_and_belittle:    # 夸和贬怎么放一起
-    refusing:               # 拒绝的时候
-    kinks:                  # 每条一个可执行动作，可附一句纯台词
+    position_and_tone:      # 主导/顺从定位、一贯口调与主导权反转条件（breaking_condition）
+    common_approaches:      # 常见互动与拿捏方式（用「有时…一些情况下…例如…」写前戏、夸贬、引导或服务）
+    boundary_and_refusal:   # 拒绝、设限或对方越界时的反应方向与开放示例
+    kinks:                  # 每条一个可执行动作方向（可带「例如…」与一句纯台词）
       -
-    language_during:        # 行为中的话，纯台词
+    language_during:        # 行为中的代表性纯台词
       -
-    own_orgasm:             # 她自己失控的样子
-    post_scene:             # 结束之后
-    breaking_condition:     # 什么情况下她的手段全部失效
+    climax_and_aftercare:   # 高潮失控表现与事后温存/反应（平时…有时…在特殊情况下…）
 
   # -- 11 角色 QA (character_qa) --
   # 可选的高密度校准容器（5至8条）。只用于核心矛盾、表里落差或其他 traits 无法单独承载的重点，不为普通场景凑题。
