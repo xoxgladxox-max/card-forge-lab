@@ -1,12 +1,12 @@
 ---
 name: cf-card-worldbook
-description: v4.9.2｜世界观与世界书：写世界观设定（原作基底、IF 分歧、世界规则，世界与角色的分界；区分硬锚点与用「平时…有时…一些…例如…在特殊情况下…」留出弹性的习俗和概念规则）和 SillyTavern 世界书条目（关键词触发、插入位置、递归、常驻、分组、预算、内嵌或独立世界书），按条目类型与目录区域分三步单元独立交付。用户说「写世界观」「做世界书」「加条目」「把设定拆成条目」「条目不触发」「关键词怎么写」时使用。
+description: v4.9.3｜世界观与世界书：写世界观设定（原作基底、IF 分歧、世界规则，世界与角色的分界；区分硬锚点与用「平时…有时…一些…例如…在特殊情况下…」留出弹性的习俗和概念规则）和 SillyTavern 世界书条目（关键词触发、插入位置、递归、常驻、分组、预算、内嵌或独立世界书），按条目类型与目录区域分三步单元独立交付。用户说「写世界观」「做世界书」「加条目」「把设定拆成条目」「条目不触发」「关键词怎么写」时使用。
 metadata:
-  version: 4.9.2
+  version: 4.9.3
   updated: 2026-10-21
 ---
 
-# 世界书（v4.9.2）
+# 世界书（v4.9.3）
 
 范围：世界观写什么（世界节点），以及设定怎样变成按需加载的世界书条目。卡文件装配和导出校验不在本技能。
 
@@ -165,7 +165,9 @@ order: 201                 # 一般不写，导出时按组自动编号；写了
 | Outlet（数值 7） | 不自动注入，由 `{{outlet::名字}}` 宏引用 |
 
 - 别记反：2 / 3 是 Author's Note，5 / 6 是示例消息。网上很多资料写反。
-- 顶层 `position` 字符串只能写 `before_char` / `after_char`；示例前后、@Depth、AN 位置看 `extensions.position` 数值，酒馆实际读的是它。
+- 顶层 `position` 在 `.md` 节点头里只写 `before_char`、`after_char` 或 `"@D0"` / `"@D1"` / `"@D2"` ...（按深度插入直接写 `position: "@D1"`，不要写 `position: after_char` 加 `depth: 1`）。
+- 节点头（frontmatter）顶层可直接写：`title`、`type`、`position`、`constant`、`enabled`（默认关闭的自选条目写 `enabled: false`）、`keys`、`secondary`、`selectiveLogic`、`scan_depth`、`recursion`（或 `exclude_recursion`、`prevent_recursion`）、`probability`、`ignore_budget`。
+- **酒馆条目名与文件名同步规则**：酒馆世界书列表里的条目名（`comment`）以节点头的 `title:` 为准。除带有 `01-` 这类排序序号前缀的文件外，文件名、`title:` 与正文首行 `<标签 name="...">` 应保持一致；修改条目文件名时，必须同步修改文件内的 `title:` 与正文首行标签属性，否则酒馆里的条目名不会变。
 - 排序：同位置内 `insertion_order` 越大越靠后、影响越大。新卡按组连续编号、不重复：世界 1xx、人物 2xx、文风 3xx、输出 4xx、开场白及其他（greeting / plot / event / wiki）5xx；同一大类内按「上位总纲 → 同类下位专项」集中排列、连续编号。范本 158 条全是 100，是旧卡写法，不照搬。
 
 ## 一张卡能带几本书

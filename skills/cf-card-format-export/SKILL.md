@@ -1,12 +1,12 @@
 ---
 name: cf-card-format-export
-description: v3.13.2｜文风、开场白、回复格式与导出：写文风规则、开场白（含篇章生成器）、每轮回复格式和状态栏，并把内容装配成 SillyTavern 可导入的卡（V2/V3 JSON、PNG、内嵌世界书、校验脚本）。按文本类型与工程区域分四步（文风说明区 → 格式协议区 → 开场白 RP 正文区 → 成品导出区）独立交付；区分固定格式锚点与用「平时…有时…一些时候…例如…在特殊情况下…」留足弹性的镜头、词池与状态栏。用户说「写开场白」「定文风」「做状态栏」「回复格式」「导出卡」「转成 PNG」「转成 JSON」「文档转卡」「卡导入报错」时使用。
+description: v3.14.0｜文风、开场白、回复格式与导出：写文风规则、description.md（<role>/<context>/<instructions>/<constraints>/<output_format> 官方标准结构）、开场白（含篇章生成器）、每轮回复格式和状态栏，并把内容装配成 SillyTavern 可导入的卡（V2/V3 JSON、PNG、内嵌世界书、校验脚本）。按文本类型与工程区域分四步独立交付；区分固定格式锚点与用「平时…有时…一些时候…例如…在特殊情况下…」留足弹性的镜头、词池与状态栏。用户说「写开场白」「定文风」「做状态栏」「回复格式」「写 description」「导出卡」「转成 PNG」「转成 JSON」「文档转卡」「卡导入报错」时使用。
 metadata:
-  version: 3.13.2
+  version: 3.14.0
   updated: 2026-10-21
 ---
 
-# 配套（v3.13.2）
+# 配套（v3.14.0）
 
 范围：世界和角色以外一张卡还需要的部分：文风、回复格式、开场白、装配导出。各部分独立，按需读对应一节。
 
@@ -276,11 +276,45 @@ dlc_style_rain_harbor:
 
 | 位置 | 特点 | 放 |
 |---|---|---|
-| `description` | 与本卡元提示词一起，每轮都带 | 最核心的几条：不代写 {{user}}、停在哪里、叙述人称 |
+| `description` | 与本卡元提示词一起，每轮都带 | 角色扮演激活、世界与角色核心专名提醒、推进与描写指令、不能违反的硬限制、输出格式（只放全卡最核心、需要三次重复的内容，不重复抄写长篇背景） |
 | `system_prompt` | 替换使用者的主提示词；可能被预设挡住 | 完整输出规范 |
 | 低深度世界书条目、`depth_prompt` | 不受预设开关影响，按深度插进聊天记录 | 换了预设也必须生效的格式，例如状态栏模版 |
 
 本工作流不写 `post_history_instructions`。
+
+## `description.md` 标准结构（官方五段标签）
+
+`description.md` 每轮常驻，只放激活角色扮演、唤醒世界书与角色专名、规定推进方式与硬限制、约定输出格式的最核心内容。直接使用主流模型官方提示词指南的标准标签（`<role>`、`<context>`、`<instructions>`、`<constraints>`、`<output_format>`），内部直接写普通陈述句，不套伪代码 YAML，也不加四字小标题前缀：
+
+```xml
+<role>
+你是《[卡名]》的叙事者（{{char}}），负责扮演除 {{user}} 以外的所有角色，并推动世界运转。
+使用第三人称受限视角，只描写当前现场及 {{user}} 通过五感感知到的外在声光、温湿度、气味与动作反应。未拉近到贴身距离或角色独处前，不直接写出其他角色的内心独白与未公开的计划。
+</role>
+
+<context>
+- [1～2句说明故事发生的世界背景与核心设定，直接使用世界书里的专有名词]
+- [1～2句说明全卡最重要的特殊规则：在什么条件下会发生什么结果]
+- [列出主要角色名字及各自一句话身份说明]
+</context>
+
+<instructions>
+- 根据 {{user}} 当下的选择、台词和行动，结合世界设定与角色性格，推演周围环境和在场角色的即时反应。
+- 每轮只描写当前这一幕发生的事，在需要 {{user}} 回应的地方停下，不提前总结或预示未来的剧情走向。
+- 在符合世界设定的前提下，平时可以根据 {{user}} 的探索自然补充周围的环境细节、日常互动或突发小事。
+- [说明本卡战斗、恐怖或情色场面的描写程度，例如：细致写出衣物变化、肢体接触、体温气味与生理反应]
+</instructions>
+
+<constraints>
+- 严禁代写 {{user}} 的台词、动作、心理和决定。
+- [填入本卡最重要的 1～2 条不能违反的设定限制，与世界书和角色卡保持一致]
+</constraints>
+
+<output_format>
+- 角色说出口的台词使用「」，贴身暴露或独处时的内心独白使用『』。
+- 每轮回复末尾输出 `<status>` 状态栏。
+</output_format>
+```
 
 ## 回复结构
 
@@ -406,7 +440,11 @@ dlc_style_rain_harbor:
    - `greeting` 放 `message/<n>.md`：`0.md` 为 `first_mes`，`1.md` 起为 `alternate_greetings`。
    - 单槽字段放顶层 `<字段>.md`（`description.md`、`personality.md`、`scenario.md`、`mes_example.md`、`system_prompt.md`、`post_history_instructions.md`，空字段不生成）。`note` 不导出。creator_notes、post_history_instructions、tags、mes_example 默认不写。
    - `.md` 节点文件有且仅有以下两种合法格式（`card-forge-lab/src/lib/nodes.mjs` 与 `protocol.mjs`）：
-     - **格式 A：带 YAML frontmatter 的节点文件（`card.md`、`world_book/**/*.md`，或显式声明设置的字段文件）**。只要文件开头写了 `--- ... ---` YAML 块，**第二个 `---` 下方必须有且仅有一行 `<!-- body -->` 作为正文分界标记**（缺标记报 `[P1]`、多标记报 `[P2]` 阻断构建）。`---` 与 `<!-- body -->` 之间为可选「工序段」（`## 工序`、`- 状态：...`、`- 确认方式：...`，工具只读状态不装入卡正文）；`<!-- body -->` 之后才是装入卡或世界书的正文（即使 `card.md` 没有正文，只要写了 `---` 头，末尾也必须带一行 `<!-- body -->`）。`position` 合法值仅限 `before_char`、`after_char`、`"@D0"` / `"@D1"` / `"@D2"` ...（带 `@` 的值在 YAML 中加双引号）；`type` 合法值仅限 `card`、`world`、`location`、`rule`、`item`、`lore`、`character`、`module`、`corpus`、`style`、`output`、`greeting`、`note`、`plot`、`wiki`、`event`；常驻条目写 `constant: true`，非常驻条目必须写非空数组 `keys: [...]`。
+     - **格式 A：带 YAML frontmatter 的节点文件（`card.md`、`world_book/**/*.md`，或显式声明设置的字段文件）**。只要文件开头写了 `--- ... ---` YAML 块，**第二个 `---` 下方必须有且仅有一行 `<!-- body -->` 作为正文分界标记**（缺标记报 `[P1]`、多标记报 `[P2]` 阻断构建）。`---` 与 `<!-- body -->` 之间为可选「工序段」（`## 工序`、`- 状态：...`、`- 确认方式：...`，工具只读状态不装入卡正文）；`<!-- body -->` 之后才是装入卡或世界书的正文（即使 `card.md` 没有正文，只要写了 `---` 头，末尾也必须带一行 `<!-- body -->`）。
+       - `position` 合法值仅限 `before_char`、`after_char`、`"@D0"` / `"@D1"` / `"@D2"` ...（带 `@` 的值在 YAML 中加双引号；不要写 `position: after_char` 加 `depth: 1`，按深度插入一律直接写 `position: "@D1"`）。
+       - `type` 合法值仅限 `card`、`world`、`location`、`rule`、`item`、`lore`、`character`、`module`、`corpus`、`style`、`output`、`greeting`、`note`、`plot`、`wiki`、`event`。
+       - 顶层可直接写的条目开关与触发字段：`constant: true/false`、`enabled: true/false`（默认开启；自选关闭条目写 `enabled: false`）、`keys: [...]`、`secondary: [...]`、`selectiveLogic: 0/1/2/3`、`scan_depth: <整数>`、`recursion: true/false`（或分别写 `exclude_recursion: true/false`、`prevent_recursion: true/false`）、`probability: 100`、`ignore_budget: true/false`。
+       - `title` 与文件名对齐规则：酒馆世界书列表显示的条目名以 `title` 为准。当文件名不带 `01-` 这类排序序号前缀时，`title` 应与文件名及正文首行 `<标签 name="...">` 保持一致；修改条目文件名时必须同步修改 `title` 与正文首行标签属性。
      - **格式 B：不带 YAML frontmatter 的纯正文文件（仅限上述顶层单槽字段 `.md` 与 `message/<n>.md`）**。不写开头 `---` 块时，**不要写 `<!-- body -->`**，整个文件直接作为该字段正文；一旦在开头加了 `---` 块，就必须按格式 A 加上一行 `<!-- body -->`。
    - 一个节点要出多条条目时（例：配角群每人一条），每人一个 `.md` 放 `world_book/character/`（或 `world_book/`）下；不在导出后另跑脚本拆，否则构建记录的指纹对不上。
    - 进世界书的 character 节点放 `world_book/` 下（或显式写 `target: character_book`）；`description.md` 由 output 节点写本卡元提示词。corpus、output、greeting 写明去处或按规定目录放。

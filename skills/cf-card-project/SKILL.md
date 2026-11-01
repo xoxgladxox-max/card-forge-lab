@@ -1,12 +1,12 @@
 ---
 name: cf-card-project
-description: v3.7.2｜卡工程管理：一张酒馆卡拆成文件夹后放在哪、怎么分区、怎么认版本，以及接卡（从酒馆拆出）、对应旧版、日常修改、推回酒馆、从酒馆拉回的流程。按文本与用途把工程划分为九个专属子区域，并按三步独立单元（建仓盘点 / 立项建单 / 归档同步）分步推进。用户说「把酒馆里的卡拆出来」「建卡工程」「旧版内容怎么放」「老卡迁移」「散乱设定稿整理成卡」「推到酒馆」「从酒馆拉回来」「待归位怎么处理」「两个版本哪个新」时，或要往卡工程里写入、和酒馆同步时使用。只管内容落在哪里、按什么顺序、怎么核对，不管内容怎么写。
+description: v3.7.3｜卡工程管理：一张酒馆卡拆成文件夹后放在哪、怎么分区、怎么认版本，以及接卡（从酒馆拆出）、对应旧版、日常修改、推回酒馆、从酒馆拉回的流程。按文本与用途把工程划分为九个专属子区域，并按三步独立单元（建仓盘点 / 立项建单 / 归档同步）分步推进。用户说「把酒馆里的卡拆出来」「建卡工程」「旧版内容怎么放」「老卡迁移」「散乱设定稿整理成卡」「推到酒馆」「从酒馆拉回来」「待归位怎么处理」「两个版本哪个新」时，或要往卡工程里写入、和酒馆同步时使用。只管内容落在哪里、按什么顺序、怎么核对，不管内容怎么写。
 metadata:
-  version: 3.7.2
+  version: 3.7.3
   updated: 2026-10-21
 ---
 
-# 卡工程流程（v3.7.2）
+# 卡工程流程（v3.7.3）
 
 范围：内容落在哪里、按什么顺序、怎么核对。不管内容怎么写。流程不绑定具体工具，命令见文末「工具对照」。
 
@@ -118,9 +118,10 @@ order: 201
 </character>
 ```
 
-- `position` 合法值仅限：`before_char`、`after_char`、`"@D0"` / `"@D1"` / `"@D2"` ...（带 `@` 的值在 YAML 中加双引号）。
+- `position` 合法值仅限：`before_char`、`after_char`、`"@D0"` / `"@D1"` / `"@D2"` ...（带 `@` 的值在 YAML 中加双引号；按深度插入直接写 `position: "@D1"`）。
 - `type` 合法值仅限：`card`、`world`、`location`、`rule`、`item`、`lore`、`character`、`module`、`corpus`、`style`、`output`、`greeting`、`note`、`plot`、`wiki`、`event`。
-- 常驻条目写 `constant: true`（可不写 `keys`）；非常驻世界书条目必须写非空数组 `keys: [...]`。
+- 常驻条目写 `constant: true`（可不写 `keys`）；非常驻世界书条目必须写非空数组 `keys: [...]`。顶层还可直接写 `enabled: false`（默认关闭条目）、`secondary: [...]`、`selectiveLogic`、`scan_depth`、`recursion`（或 `exclude_recursion`、`prevent_recursion`）、`probability`、`ignore_budget`。
+- **改文件名必须同步改 `title` 与顶层标签属性**：酒馆世界书列表里的条目名由 `title:` 决定，只改 `.md` 文件名不会改变酒馆里的条目名；除带有 `01-` 这类排序前缀的文件外，文件名、`title:` 与正文首行 `<标签 name="...">` 必须一致。
 
 ### 格式 B：不带 YAML frontmatter 的纯正文文件（仅限位置含义固定的顶层单槽字段与开场白）
 - 适用文件：`description.md`、`personality.md`、`scenario.md`、`mes_example.md`、`system_prompt.md`、`post_history_instructions.md`、`message\0.md`（主开场白）、`message\1.md` 起（备选开场白）。
