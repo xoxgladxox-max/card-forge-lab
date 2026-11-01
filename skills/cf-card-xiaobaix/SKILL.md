@@ -1,12 +1,12 @@
 ---
 name: cf-card-xiaobaix
-description: v1.2.0｜小白X（LittleWhiteBox）角色卡前端与循环任务构建：纯小白X架构（零酒馆助手依赖）、<<taskjs>> 循环任务挂载、LWB_StateV2 与 variables.local 状态同步、楼层胶囊条与隐藏状态容器、终端内剧情正文阅读框、无图期 CG 折叠槽、桌面双栏与手机四 Tab 自适应、游戏化展示与叙事行动分层、前端随机与保底、三层场景状态机、属性阈值解锁，以及本地美术素材 Base64 打包与独立 HTML 预览。用户说「做小白X前端」「写 taskjs」「小白X任务」「做交互终端」「养成前端」「状态栏 HUD」「打包前端素材」时使用。
+description: v1.3.0｜小白X（LittleWhiteBox）角色卡前端与循环任务构建：纯小白X架构（零酒馆助手依赖）、<<taskjs>> 循环任务挂载、LWB_StateV2 与 variables.local 状态同步、楼层胶囊条与隐藏状态容器、终端内剧情正文阅读框、无图期 CG 折叠槽、桌面双栏与手机四 Tab 自适应、游戏化展示与叙事行动分层、前端随机与保底、三层场景状态机、属性阈值解锁，以及本地美术素材 Base64 打包与独立 HTML 预览；严格隔离「前端源码区」与「卡内设定文本」，按状态契约 → 源码预览 → 打包注入三步独立交付。用户说「做小白X前端」「写 taskjs」「小白X任务」「做交互终端」「养成前端」「状态栏 HUD」「打包前端素材」时使用。
 metadata:
-  version: 1.2.0
+  version: 1.3.0
   updated: 2026-10-21
 ---
 
-# 小白X角色卡前端与任务构建（v1.2.0）
+# 小白X角色卡前端与任务构建（v1.3.0）
 
 范围：角色卡内嵌的小白X（LittleWhiteBox）循环任务（`xiaobaix-tasks`）、全屏交互终端、楼层状态栏 HUD 正则、状态变量读写（`LWB_StateV2` 与 `variables.local`）、场景与属性养成状态机，以及本地美术素材的分离打包与独立预览。
 
@@ -16,6 +16,13 @@ metadata:
 - 源码与素材分离：前端源码（`terminal.src.js`，约 20~30KB）只写逻辑、配置与样式，用 `var ASSETS = __ASSETS__;` 占位；图片转为 WebP/PNG/JPG Base64 并注入 `xiaobaix-tasks.json` 的步骤由本技能自带的 `scripts/pack-xiaobaix.mjs` 完成，避免源码因内嵌数 MB 图片无法编辑或版本比对。
 - 不破坏原卡状态栏与世界书触发：正文末尾的 `<status>[...]</status>`（及隐藏锚点注释）保持原卡约定格式一字不改；前端通过聊天记录与 DOM `innerHTML` 双通道解析 `<status>`，并同步给小白X的 `LWB_StateV2.applyText` 与 `SillyTavern.getContext().variables.local`。
 - 顶层窗口穿透与幂等热清理：小白X的 `<<taskjs>>` 运行在异步函数作用域或子 iframe 中，挂载全屏终端与悬浮按钮时需穿透到 `window.parent`，并在每次重跑时自动卸载旧 DOM 节点、样式表、事件监听与定时器。
+- **工程区域划分与三步任务方案（前端代码与卡内文本彻底解耦）**：
+  - **只读区域**：状态栏字段与阶段锚点协议、角色与地点基础索引（不改动 `world_book/` 与 `message/` 正文）。
+  - **只写区域**：`<卡名>/前端源码/`（`terminal.src.js`、`assets/`、`preview.html`）、`<卡名>/regex/`（状态栏胶囊条正则）、`<卡名>/scripts/xiaobaix-tasks.json`。
+  - **三步独立单元（Unit）**：
+    - **Unit 1 状态契约与界面分栏对齐**：核对 `<status>` 字段、三层场景状态机、展示项与待执行行动队列 → **停下供作者确认界面规划**。
+    - **Unit 2 编写 `前端源码/` 与 `preview.html` 本地调试**：完成桌面双栏/手机四 Tab、无图期 CG 折叠槽与前端随机保底逻辑 → **停下供作者在浏览器双击 `preview.html` 验收交互**。
+    - **Unit 3 Base64 素材打包与注入**：运行 `scripts/pack-xiaobaix.mjs` 生成 `scripts/xiaobaix-tasks.json` 与 `regex/`。
 
 # 一、卡工程槽位与小白X数据结构
 
