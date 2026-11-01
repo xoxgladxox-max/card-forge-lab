@@ -1,12 +1,12 @@
 ---
 name: cf-card-oneclick
-description: v2.9.1｜一键出卡：开头一次问清这张卡要什么并提出结构提案，支持「分模块精修模式（默认：每完成一个独立模块与文体停下供精修）」与「全自动直通模式（作者明确要求一口气跑完时启用）」，按 调研 → 世界书 → 角色 → 配套 → 审查 → 装配 推进。用户说「做一张卡」「一键出卡」「从头做整张卡」「整理已有卡」时使用。
+description: v2.9.2｜一键出卡：开头一次问清这张卡要什么并提出结构提案，支持「分模块精修模式（默认：按工程子区域与文本类型逐块停下供精修）」与「全自动直通模式（作者明确要求一口气跑完时启用）」，按 调研 → 世界书 → 角色 → 配套 → 审查 → 装配 推进。用户说「做一张卡」「一键出卡」「从头做整张卡」「整理已有卡」时使用。
 metadata:
-  version: 2.9.1
+  version: 2.9.2
   updated: 2026-10-21
 ---
 
-# 一键出卡（v2.9.1）
+# 一键出卡（v2.9.2）
 
 范围：从提问到交付的整张卡流程。各阶段的写法读对应领域技能，本技能只管顺序、分模块边界、文体切换、标记、停止条件和交付。
 
@@ -42,10 +42,10 @@ metadata:
 
 | 阶段 | 读哪个技能 | 产出 | 本流程里的处理 |
 |---|---|---|---|
-| 1 调研 | cf-card-research | `记录/调研/{00-索引, world-*, rules-*, char-<角色>}.md` | 客观查证文体；按世界观、规则、单角色分包独立产出，供后续阶段按需单读 |
-| 2 世界书 | cf-card-worldbook | world / location / rule / item / lore 节点与触发配置 | 平实说明文体；只读 `world-*` 与 `rules-*`；先产上位总纲与拆分表，再按条写专项机制；硬规矩写实，风俗细节与概念法则用「有时…一些…例如…在特殊情况下…」给开放方向 |
-| 3 角色 | cf-card-character | character / module / corpus 节点 | 每次只写 1 个角色，只读世界总纲与该角色的 `char-<角色>.md`；先写静态锚点与随境行为（平实说明文体），再单独切到纯自然口语文体写 `speaking_style` 与 `dialogue_examples` |
-| 4 配套 | cf-card-format-export；需要小白X前端时加读 cf-card-xiaobaix | style / output / greeting 节点，以及可选的 regex / xiaobaix-tasks.json | 三种不同文体分步处理：先定文风（指导说明），再定状态栏与回复格式（结构化协议），最后按纯 RP 小说正文写开场白（先写第 1 条核对语感） |
+| 1 调研 | cf-card-research | `记录/调研/{00-索引, world-*, rules-*, char-<角色>-档案与判型, char-<角色>-台词语料}.md` | 按文本类型分文件归档：世界事实、规则考据、单角色档案与专业判型、单角色原话台词各自独立成文件，供下游按需单读 |
+| 2 世界书 | cf-card-worldbook | `world_book/world/` 下的 world / location / rule / item / lore 节点 | 平实说明文体；只读 `world-*` 与 `rules-*`；按 Unit 1 上位总纲 → Unit 2 核心习俗与机制 → Unit 3 地点道具合集三步推进 |
+| 3 角色 | cf-card-character | `world_book/character/` 下的 character / module / corpus 节点 | 每次只写 1 个角色；Unit 1/2 只读 `char-<角色>-档案与判型.md` 写设定说明，Unit 3 只读 `char-<角色>-台词语料.md` 写纯自然口语台词 |
+| 4 配套 | cf-card-format-export；需要小白X前端时加读 cf-card-xiaobaix | `world_book/style/`、`output`、`message/`，以及可选的 `前端源码/`、`regex/`、`scripts/xiaobaix-tasks.json` | 按工程区域分四步：Unit 1 文风说明区 → Unit 2 格式与状态栏协议区 → Unit 3 开场白纯 RP 正文区（先写 `0.md` 核对语感） → Unit 4 装配导出 |
 | 5 审查 | cf-card-review；表达问题按 cf-card-refine 改 | 审查报告 | 表达问题就地修；事实、归属、上游层的问题不改，记入交付报告 |
 | 6 装配 | cf-card-format-export 第四、五部分 | 卡文件、世界书、校验结果 | 原卡先备份再写；跑两个校验脚本并回读 |
 
