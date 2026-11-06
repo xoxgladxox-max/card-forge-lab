@@ -89,3 +89,18 @@ test('P18：标题写路径、标题没包含 name、结尾标签写错各报；
   assert.match(at('未闭合').map(x => x.message).join(), /配对的顶层标签/);
   assert.equal(at('多块').length, 0, JSON.stringify(at('多块')));
 }, { timeout: 90000 });
+
+test('P18f 与 P25：非角色条目带冗余类型前缀报 P18f（角色带阵营前缀不报）；常驻未关递归或泄漏绿灯触发词报 P25', async () => {
+  const tmp = await copyProject(EXAMPLE);
+  await addNode(tmp, 'world/01-世界总纲', 'type: world\nid: wld-rec\ntitle: "世界 · 世界总纲"\nconstant: true\nrecursion: true', '<world name="世界总纲">\ncore: 包含玄微子的常驻说明\n</world>');
+  await addNode(tmp, 'character/玄微子', 'type: character\nid: chr-xwz\ntitle: "隐世宗门 · 玄微子"\nkeys: [玄微子]\nconstant: false', '<character name="玄微子">\ncore: 角色设定\n</character>');
+  const ws = validateNodes(await scanCard(tmp)).warnings;
+  const p18f = ws.filter(w => w.rule === 'P18f');
+  assert.equal(p18f.length, 1, JSON.stringify(p18f));
+  assert.match(p18f[0].message, /冗余分类前缀/);
+  const p25 = ws.filter(w => w.rule === 'P25');
+  assert.equal(p25.length, 2, JSON.stringify(p25));
+  assert.ok(p25.some(w => /prevent_recursion: true/.test(w.message)), JSON.stringify(p25));
+  assert.ok(p25.some(w => /玄微子/.test(w.message)), JSON.stringify(p25));
+}, { timeout: 90000 });
+
