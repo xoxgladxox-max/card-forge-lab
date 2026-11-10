@@ -31,25 +31,25 @@ async function writeSplit(dir, ext, keep) {
   }
 }
 
-test('listExtras 列出可拆项，空的小白X任务不算；已停用正则默认留卡', () => {
+test('listExtras 列出可拆项（含小白X模板与变量），空的小白X任务不算；默认全拆', () => {
   const card = { data: { extensions: sampleExt() } };
   assert.deepEqual(ex.listExtras(card).map(i => i.key), ['regex:a', 'regex:b', 'regex:c', 'script:s1', 'vars']);
-  assert.deepEqual(ex.defaultKeep(card), ['regex:b']);
+  assert.deepEqual(ex.defaultKeep(card), []);
 });
 
-test('按默认勾选拆开再合回，extensions 与原卡一致且顺序不变', async () => {
+test('按勾选拆开再合回，extensions 与原卡一致且顺序不变', async () => {
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'cf-extras-'));
   try {
     const ext = sampleExt();
-    const keep = new Set(ex.defaultKeep({ data: { extensions: ext } }));
+    const keep = new Set(['regex:b']);
     await writeSplit(dir, ext, keep);
     const kept = ex.keptExtensions(ext, keep);
     assert.deepEqual(kept.regex_scripts.map(r => r.id), ['b']);
     assert.equal(kept.tavern_helper, undefined);
     assert.deepEqual(kept.depth_prompt, ext.depth_prompt);
-    // 斜杠被换掉，替换内容单独成 .html
+    // 斜杠被换掉，替换内容单独成 .html；纯剔除型正则（replaceString === ''）只出 .json 不出 0 字节 .html
     const files = (await fs.readdir(path.join(dir, 'regex'))).sort();
-    assert.deepEqual(files, ['01-A.html', '01-A.json', '03-C_有斜杠.html', '03-C_有斜杠.json']);
+    assert.deepEqual(files, ['01-A.html', '01-A.json', '03-C_有斜杠.json']);
     assert.equal(await fs.readFile(path.join(dir, 'regex/01-A.html'), 'utf8'), '<b>x</b>\n');
     const data = ex.applyExtras({ extensions: kept }, await ex.readExtras(dir));
     assert.deepEqual(data.extensions, ext);

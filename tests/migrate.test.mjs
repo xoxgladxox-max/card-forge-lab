@@ -55,14 +55,15 @@ test('migrate：旧版节点树转标准卡工程，正文、工序、设置都�
 
   const card = await fs.readFile(path.join(out, 'card.md'), 'utf8');
   assert.match(card, /name: 测试老卡/);
-  assert.match(card, /## 槽位对照/);
-  assert.match(await fs.readFile(path.join(out, 'message/0.md'), 'utf8'), /<!-- body -->\n你好，\{\{user\}\}。/);
+  assert.doesNotMatch(card, /<!-- body -->/);
+  assert.match(await fs.readFile(path.join(out, 'message/0.md'), 'utf8'), /你好，\{\{user\}\}。/);
   assert.match(await fs.readFile(path.join(out, 'message/1.md'), 'utf8'), /备选。/);
-  const world = await fs.readFile(path.join(out, 'world_book/world/测试世界.md'), 'utf8');
+  const world = await fs.readFile(path.join(out, 'lorebooks/world/测试世界.md'), 'utf8');
   assert.match(world, /id: wld-test/);
   assert.match(world, /order: 101/);
-  const sub = await fs.readFile(path.join(out, 'world_book/world/测试世界/子条目.md'), 'utf8');
-  assert.match(sub, /## 工序\n- 状态：草稿\n\n<!-- body -->\n<lore name="子">/);
+  const sub = await fs.readFile(path.join(out, 'lorebooks/world/测试世界/子条目.md'), 'utf8');
+  assert.match(sub, /<lore name="子">/);
+  assert.doesNotMatch(sub, /<!-- body -->/);
   assert.match(sub, /id: wb-world-测试世界-子条目/);
   assert.equal(await fs.readFile(path.join(out, '记录/调研.md'), 'utf8'), '调研资料\n');
   assert.equal(await fs.readFile(path.join(out, '记录/note/a.md'), 'utf8'), '笔记\n');

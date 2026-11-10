@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""grok_search.py — xAI Grok 实时搜索 CLI（REST 直连，无需 xai_sdk）
+"""grok_search.py · xAI Grok 实时搜索 CLI（REST 直连，免装 xai_sdk）
 
 用法示例：
   python grok_search.py "<作品名> 世界观 <角色名>是谁"

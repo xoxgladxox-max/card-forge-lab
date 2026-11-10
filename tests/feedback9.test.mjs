@@ -92,8 +92,8 @@ test('P18：标题写路径、标题没包含 name、结尾标签写错各报；
 
 test('P18f 与 P25：非角色条目带冗余类型前缀报 P18f（角色带阵营前缀不报）；常驻未关递归或泄漏绿灯触发词报 P25', async () => {
   const tmp = await copyProject(EXAMPLE);
-  await addNode(tmp, 'world/01-世界总纲', 'type: world\nid: wld-rec\ntitle: "世界 · 世界总纲"\nconstant: true\nrecursion: true', '<world name="世界总纲">\ncore: 包含玄微子的常驻说明\n</world>');
-  await addNode(tmp, 'character/玄微子', 'type: character\nid: chr-xwz\ntitle: "隐世宗门 · 玄微子"\nkeys: [玄微子]\nconstant: false', '<character name="玄微子">\ncore: 角色设定\n</character>');
+  await addNode(tmp, 'world/01-世界总纲', 'type: world\nid: wld-rec\ntitle: "世界 · 世界总纲"\nconstant: true\nrecursion: true', '<world name="世界总纲">\ncore: 包含云崖散人的常驻说明\n</world>');
+  await addNode(tmp, 'character/云崖散人', 'type: character\nid: chr-yysr\ntitle: "隐世宗门 · 云崖散人"\nkeys: [云崖散人]\nconstant: false', '<character name="云崖散人">\ncore: 角色设定\n</character>');
   const ws = validateNodes(await scanCard(tmp)).warnings;
   const p18f = ws.filter(w => w.rule === 'P18f');
   assert.equal(p18f.length, 1, JSON.stringify(p18f));
@@ -101,6 +101,24 @@ test('P18f 与 P25：非角色条目带冗余类型前缀报 P18f（角色带阵
   const p25 = ws.filter(w => w.rule === 'P25');
   assert.equal(p25.length, 2, JSON.stringify(p25));
   assert.ok(p25.some(w => /prevent_recursion: true/.test(w.message)), JSON.stringify(p25));
-  assert.ok(p25.some(w => /玄微子/.test(w.message)), JSON.stringify(p25));
+  assert.ok(p25.some(w => /云崖散人/.test(w.message)), JSON.stringify(p25));
 }, { timeout: 90000 });
 
+test('P26：启用显式 <thinking> 未配双通道剥离正则时报警告，补齐后零警告', async () => {
+  const tmp = await copyProject(EXAMPLE);
+  await fs.writeFile(path.join(tmp, 'description.md'), ['<output_format>', '<thinking>', '1. 意图与前文校准', '</thinking>', '</output_format>', ''].join("\\n"), 'utf8');
+  const ws1 = validateNodes(await scanCard(tmp)).warnings.filter(w => w.rule === 'P26');
+  assert.equal(ws1.length, 1, JSON.stringify(ws1));
+  assert.match(ws1[0].message, /markdownOnly: true/);
+  await fs.mkdir(path.join(tmp, 'regex'), { recursive: true });
+  await fs.writeFile(path.join(tmp, 'regex', '01-隐藏并剥离思维链.json'), JSON.stringify({
+    scriptName: '隐藏并剥离思维链',
+    findRegex: '<thinking>[\\s\\S]*?<\\/thinking>\\s*',
+    replaceString: '',
+    markdownOnly: true,
+    promptOnly: true,
+    disabled: false,
+  }, null, 2), 'utf8');
+  const ws2 = validateNodes(await scanCard(tmp)).warnings.filter(w => w.rule === 'P26');
+  assert.equal(ws2.length, 0, JSON.stringify(ws2));
+}, { timeout: 90000 });

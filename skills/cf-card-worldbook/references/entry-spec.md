@@ -90,7 +90,7 @@
 
 > 注意两个**不转驼峰的例外**：`extensions.selectiveLogic` 和 `extensions.useProbability` 在内嵌格式里就是驼峰写法（源码里就这么读），写成 `selective_logic` / `use_probability` 会被当不存在而回退默认值。
 >
-> 反向验证（导出侧 `convertWorldInfoToCharacterBook()`）：酒馆把独立世界书写回卡内嵌书时，**顶层只写 11 个字段**（id/keys/secondary_keys/comment/content/constant/selective/insertion_order/enabled/position/use_regex），其余全部进 `extensions`——与本文二/三节的结构一致。双向转换都对得上，说明结构无误。
+> 反向验证（导出侧 `convertWorldInfoToCharacterBook()`）：酒馆把独立世界书写回卡内嵌书时，**顶层只写 11 个字段**（id/keys/secondary_keys/comment/content/constant/selective/insertion_order/enabled/position/use_regex），其余全部进 `extensions`，与本文二/三节的结构一致。双向转换都对得上，说明结构无误。
 
 > 导入内嵌书时酒馆自动跑这个转换，**所以默认就写内嵌格式**；只有用户要可单独导入的 World Info 文件时，才按上表转成驼峰格式。
 
@@ -127,9 +127,9 @@
 | `insertion_order` | number | 越大越靠后插入 = 影响越大。范本默认 100 |
 | `enabled` | bool | 开关 |
 | `position` | string | `before_char` / `after_char`（其余位置以 extensions.position 数值为准） |
-| `use_regex` | bool | **兼容字段，酒馆前端根本不读**。导出时源码硬写 `true`（注释：ST keys are always regex）。照写 `true` 即可 |
+| `use_regex` | bool | **兼容位字段**。导出时源码固定写 `true`（注释：ST keys are always regex），保持 `true` 即可 |
 
-> 🚨 `use_regex` 是纯装饰。`world-info.js` 里搜不到 `use_regex`/`useRegex`——匹配逻辑是 `matchKeys()` 对**每个** key 跑一次 `parseRegexFromString(needle)`：能解析成 `/pattern/flags` 就走正则并**无视其余匹配选项**（大小写、全词），否则按纯文本。所以：想要正则就把 key 写成 `/角色本名|外文名/i`，不想要就写普通词，**跟这个字段没关系**。合法 flags 只有 `g i m s u y`。
+> 说明：`matchKeys()` 会对每个 key 调用 `parseRegexFromString(needle)`，识别到 `/pattern/flags` 形式即按正则匹配（合法 flags 为 `g i m s u y`，此时大小写与全词选项由 flags 自行决定），普通字符串则按纯文本子串匹配。需要正则变体时直接将 key 写为 `/角色本名|外文名/i`。
 
 ## 三、extensions 全字段
 
@@ -188,13 +188,13 @@
 | `role` | @ Depth 的消息角色，见下表 |
 | `vectorized` | 允许向量匹配（需向量扩展） |
 | `sticky` | 激活后保持 N 条消息（期间免概率检查） |
-| `cooldown` | 激活后 N 条消息内禁止再激活 |
+| `cooldown` | 激活结束后冷却 N 条消息再开放触发 |
 | `delay` | 聊天满 N 条消息才允许激活 |
 | `match_*` 六项 | 额外扫描源：persona 描述/角色描述/性格/深度提示/场景/创作者笔记 |
 | `triggers` | 限定生成类型（normal/continue/impersonate/swipe/regenerate/quiet），空 = 全部 |
 | `ignore_budget` | 无视 token 预算强插，慎用 |
 
-## 四、数值编码对照（源码枚举，不要猜）
+## 四、数值编码对照（源码枚举）
 
 ### position
 
@@ -273,7 +273,7 @@ AND_ANY: 0, NOT_ALL: 1, NOT_ANY: 2, AND_ALL: 3
 这里才是真正的条目内容
 ```
 
-`@@activate` = 强制激活（无视关键词），`@@dont_activate` = 强制不激活。`@@@` 前缀是 fallback（上一行是未知装饰器时才生效）。不常用，但看到别人卡里有 `@@` 开头不要当乱码删。
+`@@activate` = 强制激活（无视关键词），`@@dont_activate` = 强制不激活。`@@@` 前缀是 fallback（上一行是未知装饰器时才生效）。看到外部卡条目正文以 `@@` 开头时，按装饰器指令原样保留。
 
 ## 五、范本实证参数（多角色世界卡的典型配置）
 
@@ -300,7 +300,7 @@ AND_ANY: 0, NOT_ALL: 1, NOT_ANY: 2, AND_ALL: 3
 | 两者都 false | 35 | 参与递归 |
 | 仅 `prevent_recursion: true` | 1 | 能被拉起但不拉别人 |
 
-> 不是只有基底条目关递归——**大世界卡 77% 的条目都双向关死**。因为角色条目里必然提到别的角色名，不关一触发就连锁引爆半本书。**多角色卡默认就该双向关递归**，只给真正需要链式带出的条目（如地点→驻地角色）开递归。
+> **多角色卡 77% 的条目都双向关闭递归**。角色条目中常包含关联人物姓名，双向关闭可防止单次提及连锁拉起半本书。多角色卡与常驻总纲默认双向关递归，只给确需链式带出的绿灯枢纽条目（如地点带出驻地角色）按需放开单向递归。
 
 **几乎没用上的字段**
 
@@ -327,7 +327,7 @@ AND_ANY: 0, NOT_ALL: 1, NOT_ANY: 2, AND_ALL: 3
 
 单条长度分档（154 条非空）：<2k 共 12 条、2k~1万 28 条、1万~3万 41 条、3万~6万 **65 条**、>6万 8 条。
 
-> **卡本体 51 字符常驻，419 万字符按需加载**——这就是世界书的全部意义。注意这卡条目主体是**英文**（抽查最大条：86,691 字符中 ASCII 占 77,936），英文 ~4 字符/token，换成中文同样字符数的 token 会多一倍以上。写中文卡时单条别直接套这个字符数。
+> **卡本体 51 字符常驻，419 万字符按需加载**，直观体现了世界书按需注入的优势。注意该范本条目主体为英文（约 4 字符折算 1 token），中文约 1.5 字符折算 1 token，编写中文世界书时按实际 token 预算把控单条篇幅。
 
 **单条 content 格式（实证）**
 
@@ -339,11 +339,11 @@ AND_ANY: 0, NOT_ALL: 1, NOT_ANY: 2, AND_ALL: 3
 
 > 范本两种风格混用（历史遗留）。以上是范本统计；新卡按装配规则里的节点标签表。
 
-**127/154 条内部是 `character:` 开头的 yaml**——即一份完整的角色设定 yaml 直接塞进条目，不需二次改写。另有 27 条内嵌 `<XXX_Chat_example>` 台词块（世界书没有 mes_example 位置，台词只能写在 content 里）。
+**127/154 条内部是 `character:` 开头的 yaml**，把完整的角色设定直接放入条目正文。另有 27 条内嵌台词块（将角色台词收入世界书条目 `content`）。
 
 **空 keys 的两种用法**
 
-范本 5 条 keys 为空，分两种意图：
+范本 5 条 keys 为空，对应两种常见用途：
 
-1. **分组标题栏**（4 条）：`content` 也是空，comment 写成 `ーーーーー宇宙人ーーーーー`、`ーーーーーーー東京都ーーーーーー`——不注入任何东西，只在**前端列表里当分隔线**。条目上百时很管用。
-2. **软禁用**（1 条）：comment 写着「其餘宇宙人-避免資料污染未開啟」，`enabled: true` 但 keys 空——内容（3205 字符）留在卡里但永远不会触发。比 `enabled: false` 温和：想恢复时把关键词填回去就行。
+1. **分组标题栏**（4 条）：`content` 为空，comment 写成 `ーーーーー宇宙人ーーーーー`、`ーーーーーーー東京都ーーーーーー`，在前端列表里充当视觉分隔栏。
+2. **暂存备查**（1 条）：`enabled: true` 配合空 `keys`，内容保留在卡内而暂不触发，恢复时填回关键词即可。

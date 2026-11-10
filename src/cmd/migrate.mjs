@@ -75,7 +75,7 @@ function rewriteFm(fmText, { dropPosition, add }) {
 }
 
 function nodeText(fmText, head, body) {
-  return `---\n${fmText}\n---\n\n${head ? head + '\n\n' : ''}${BODY_MARK}\n${body}${body ? '\n' : ''}`;
+  return `---\n${fmText}\n---\n${body ? `\n${body}\n` : ''}`;
 }
 
 // 收集旧节点与资料
@@ -226,7 +226,7 @@ export async function migrateLegacyProject(srcDir, opts = {}) {
   }
 
   for (const n of book) {
-    const outRel = `world_book/${n.dir}.md`;
+    const outRel = `lorebooks/${n.dir}.md`;
     const add = { id: `wb-${n.dir.replace(/[\\/]+/g, '-')}` };
     if (n.target && !n.fm.target) add.target = n.target;
     const tav = {}, ext = {};
@@ -252,7 +252,7 @@ export async function migrateLegacyProject(srcDir, opts = {}) {
       if (n.fm.tavern) gaps.push(`${n.rel}：原来已有 tavern 段，未追加 ${JSON.stringify(tav)}，请人工合并`);
       else add.tavern = tav;
     }
-    if (!n.fm.target && ['character', 'corpus', 'output'].includes(n.fm.type)) notes.push(`${n.rel}：${n.fm.type} 节点没写 target，放进 world_book/ 后按世界书条目导出`);
+    if (!n.fm.target && ['character', 'corpus', 'output'].includes(n.fm.type)) notes.push(`${n.rel}：${n.fm.type} 节点没写 target，放进 lorebooks/ 后按世界书条目导出`);
     emit(n, outRel, add);
   }
   if (ref.card) {

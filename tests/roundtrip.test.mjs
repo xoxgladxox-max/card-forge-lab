@@ -78,14 +78,19 @@ test('PNG：嵌入后可解出且与 JSON 语义一致，无关块保留', async
   assert.ok(cmp.ok, cmp.report);
 });
 
-test('拦截：缺 body 标记 → check FAIL 且 build 拒绝', async () => {
+test('兼容：无 body 标记的标准 Frontmatter 正常提取正文；重复 body 标记报 P2 且 build 拒绝', async () => {
   const tmp = await copyProject(EXAMPLE);
   const p = path.join(tmp, 'description.md');
   const raw = await fs.readFile(p, 'utf8');
-  await fs.writeFile(p, raw.replace('<!-- body -->', ''), 'utf8');
-  const c = await checkCmd(tmp);
-  assert.equal(c.ok, false);
-  assert.match(c.report, /P1/);
+  // 去掉 ## 工序 和 <!-- body --> 后作为标准 Frontmatter 节点正常通过
+  await fs.writeFile(p, raw.replace(/## 工序[\s\S]*?<!-- body -->\r?\n?/, ''), 'utf8');
+  const c1 = await checkCmd(tmp);
+  assert.equal(c1.ok, true, c1.report);
+  // 出现两次 <!-- body --> 报 P2 并拒绝构建
+  await fs.writeFile(p, `${raw}\n<!-- body -->\n多余标记\n`, 'utf8');
+  const c2 = await checkCmd(tmp);
+  assert.equal(c2.ok, false);
+  assert.match(c2.report, /P2/);
   const b = await buildCmd(tmp);
   assert.equal(b.ok, false);
   assert.match(b.report, /构建拒绝/);

@@ -1,5 +1,5 @@
 ﻿<#
-fetch.ps1 — 用本机真实 Chrome 抓网页（headless），存 HTML 和去标签后的正文。
+fetch.ps1 · 用本机真实 Chrome 抓网页（headless），存 HTML 和去标签后的正文。
 
 用法：
   powershell -ExecutionPolicy Bypass -File fetch.ps1 -Url "<网址>" -Out "<存哪，不带扩展名>"

@@ -3,7 +3,7 @@
 酒馆源码取自 SillyTavern `release` 分支，行号会随版本漂移，以函数名为准。
 
 ## 规范
-- V2：malfoyslastname/character-card-spec-v2 `spec_v2.md`：字段表、`system_prompt` / `post_history_instructions` 替换与 `{{original}}`、`creator_notes` 不进提示词、`alternate_greetings` 为滑动切换、`extensions` 必须默认 `{}` 且不删未知键。
+- V2：malfoyslastname/character-card-spec-v2 `spec_v2.md`：字段表、`system_prompt` / `post_history_instructions` 替换与 `{{original}}`、`creator_notes` 作为给玩家阅读的说明独立于提示词、`alternate_greetings` 为滑动切换、`extensions` 默认 `{}` 并原样保留未知键。
 - V3：kwaroran/character-card-spec-v3 `SPEC_V3.md`：PNG `ccv3` 数据块、两块并存时用 `ccv3`、CHARX 结构、V3 新字段。
 
 ## 酒馆源码
@@ -16,7 +16,7 @@
 | 酒馆内部存 V2、`alternate_greetings` 字符串会被包成数组、`depth_prompt` 默认 4 / system | `src/endpoints/characters.js` `charaFormatData` |
 | 各字段进提示词的取值、`system_prompt` / 历史后指令受开关控制 | `public/script.js` `getCharacterCardFieldsLazy` |
 | 两个开关默认开 | `public/scripts/power-user.js` `prefer_character_prompt` / `prefer_character_jailbreak` |
-| 对话补全里「禁止覆盖」挡住角色卡替换 | `public/scripts/openai.js` `preparePromptsForChatCompletion`（`forbid_overrides`） |
+| 对话补全的主提示词「防覆盖选项」会拦截角色卡替换 | `public/scripts/openai.js` `preparePromptsForChatCompletion`（`forbid_overrides`） |
 | 首条为空时第一条备选顶上、开场白过 AI 输出正则 | `public/script.js` `getFirstMessage` |
 
 ## 实物对照
