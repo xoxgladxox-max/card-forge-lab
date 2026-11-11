@@ -70,7 +70,7 @@
 - `description.md` 承担纯泛用上位总控（角色定位、肩扛镜头边界、GM 响应规则、输出结构），保持常驻零绿灯词泄漏。
 - 角色具体设定、配角档案与台词语料放入 `lorebooks/character/` 世界书条目。
 - `personality` 与 `scenario` 顶层旧字段保持空白，将对应内容统一归入世界书对应节点单点维护。
-- 启用显式 `<thinking>` 或正文 `<state>` 时，在 `regex/` 配套 `markdownOnly: true` + `promptOnly: true` 双通道剥离脚本。
+- 回复里每种不给读者看的标签块（显式 `<thinking>`、正文 `<state>` 等）各配一条剥离正则，写法以 `cf-card-format-export` 的「隐藏标签块配双通道剥离正则」为准。
 
 ### 5. 用户需求尚处于模糊探索期
 
